@@ -65,8 +65,8 @@
 
 /* Registers used by the driver */
 #define FSPI_MCR0			0x00
-#define FSPI_MCR0_AHB_TIMEOUT(x)	((x) << 24)
-#define FSPI_MCR0_IP_TIMEOUT(x)		((x) << 16)
+#define FSPI_MCR0_IP_TIMEOUT(x)     (((u32)(x) << 24))
+#define FSPI_MCR0_AHB_TIMEOUT(x)    (((u32)(x) << 16))
 #define FSPI_MCR0_LEARN_EN		BIT(15)
 #define FSPI_MCR0_SCRFRUN_EN		BIT(14)
 #define FSPI_MCR0_OCTCOMB_EN		BIT(13)
@@ -75,17 +75,17 @@
 #define FSPI_MCR0_SERCLKDIV		BIT(8)
 #define FSPI_MCR0_ATDF_EN		BIT(7)
 #define FSPI_MCR0_ARDF_EN		BIT(6)
-#define FSPI_MCR0_RXCLKSRC(x)		((x) << 4)
-#define FSPI_MCR0_END_CFG(x)		((x) << 2)
+#define FSPI_MCR0_RXCLKSRC(x)       (((u32)(x) << 4))
+#define FSPI_MCR0_END_CFG(x)		(((u32)(x) << 2))
 #define FSPI_MCR0_MDIS			BIT(1)
 #define FSPI_MCR0_SWRST			BIT(0)
 
 #define FSPI_MCR1			0x04
-#define FSPI_MCR1_SEQ_TIMEOUT(x)	((x) << 16)
+#define FSPI_MCR1_SEQ_TIMEOUT(x)	(((u32)(x) << 16))
 #define FSPI_MCR1_AHB_TIMEOUT(x)	(x)
 
 #define FSPI_MCR2			0x08
-#define FSPI_MCR2_IDLE_WAIT(x)		((x) << 24)
+#define FSPI_MCR2_IDLE_WAIT(x)		(((u32)(x) << 24))
 #define FSPI_MCR2_SAMEDEVICEEN		BIT(15)
 #define FSPI_MCR2_CLRLRPHS		BIT(14)
 #define FSPI_MCR2_CLRAHBBUFOPT		BIT(11)
@@ -149,8 +149,8 @@
 #define FSPI_AHBRX_BUF5CR0		0x34
 #define FSPI_AHBRX_BUF6CR0		0x38
 #define FSPI_AHBRX_BUF7CR0		0x3C
-#define FSPI_AHBRXBUF0CR7_MSTRID(x)	((x) << 16)
-#define FSPI_AHBRXBUF0CR7_BUFSZ(x)	((x) << 0)
+#define FSPI_AHBRXBUF0CR7_MSTRID(x)	(((u32)(x) << 16))
+#define FSPI_AHBRXBUF0CR7_BUFSZ(x)	(((u32)(x) << 0))
 #define FSPI_AHBRXBUF0CR7_PREF		BIT(31)
 
 #define FSPI_AHBRX_BUF0CR1		0x40
@@ -167,16 +167,16 @@
 #define FSPI_FLSHB1CR0			0x68
 #define FSPI_FLSHB2CR0			0x6C
 #define FSPI_FLSHXCR0_SZ_KB		10
-#define FSPI_FLSHXCR0_SZ(x)		((x) >> FSPI_FLSHXCR0_SZ_KB)
+#define FSPI_FLSHXCR0_SZ(x)		((u32)(x) >> FSPI_FLSHXCR0_SZ_KB)
 
 #define FSPI_FLSHA1CR1			0x70
 #define FSPI_FLSHA2CR1			0x74
 #define FSPI_FLSHB1CR1			0x78
 #define FSPI_FLSHB2CR1			0x7C
-#define FSPI_FLSHXCR1_CSINTR(x)		((x) << 16)
-#define FSPI_FLSHXCR1_CAS(x)		((x) << 11)
+#define FSPI_FLSHXCR1_CSINTR(x)		(((u32)(x) << 16))
+#define FSPI_FLSHXCR1_CAS(x)		(((u32)(x) << 11))
 #define FSPI_FLSHXCR1_WA		BIT(10)
-#define FSPI_FLSHXCR1_TCSH(x)		((x) << 5)
+#define FSPI_FLSHXCR1_TCSH(x)		(((u32)(x) << 5))
 #define FSPI_FLSHXCR1_TCSS(x)		(x)
 
 #define FSPI_FLSHA1CR2			0x80
@@ -208,36 +208,36 @@
 #define FSPI_IPRXFCR			0xB8
 #define FSPI_IPRXFCR_CLR		BIT(0)
 #define FSPI_IPRXFCR_DMA_EN		BIT(1)
-#define FSPI_IPRXFCR_WMRK(x)		((x) << 2)
+#define FSPI_IPRXFCR_WMRK(x)		(((u32)(x) << 2))
 
 #define FSPI_IPTXFCR			0xBC
 #define FSPI_IPTXFCR_CLR		BIT(0)
 #define FSPI_IPTXFCR_DMA_EN		BIT(1)
-#define FSPI_IPTXFCR_WMRK(x)		((x) << 2)
+#define FSPI_IPTXFCR_WMRK(x)		(((u32)(x) << 2))
 
 #define FSPI_DLLACR			0xC0
 #define FSPI_DLLACR_OVRDEN		BIT(8)
-#define FSPI_DLLACR_SLVDLY(x)          ((x) << 3)
+#define FSPI_DLLACR_SLVDLY(x)		(((u32)(x) << 3))
 #define FSPI_DLLACR_DLLRESET		BIT(1)
-#define FSPI_DLLACR_DLLEN              BIT(0)
+#define FSPI_DLLACR_DLLEN		BIT(0)
 
 #define FSPI_DLLBCR			0xC4
 #define FSPI_DLLBCR_OVRDEN		BIT(8)
-#define FSPI_DLLBCR_SLVDLY(x)          ((x) << 3)
+#define FSPI_DLLBCR_SLVDLY(x)		(((u32)(x) << 2))
 #define FSPI_DLLBCR_DLLRESET		BIT(1)
-#define FSPI_DLLBCR_DLLEN              BIT(0)
+#define FSPI_DLLBCR_DLLEN		BIT(0)
 
 #define FSPI_STS0			0xE0
-#define FSPI_STS0_DLPHB(x)		((x) << 8)
-#define FSPI_STS0_DLPHA(x)		((x) << 4)
-#define FSPI_STS0_CMD_SRC(x)		((x) << 2)
+#define FSPI_STS0_DLPHB(x)		(((u32)(x) << 8))
+#define FSPI_STS0_DLPHA(x)		(((u32)(x) << 4))
+#define FSPI_STS0_CMD_SRC(x)		(((u32)(x) << 2))
 #define FSPI_STS0_ARB_IDLE		BIT(1)
 #define FSPI_STS0_SEQ_IDLE		BIT(0)
 
 #define FSPI_STS1			0xE4
-#define FSPI_STS1_IP_ERRCD(x)		((x) << 24)
-#define FSPI_STS1_IP_ERRID(x)		((x) << 16)
-#define FSPI_STS1_AHB_ERRCD(x)		((x) << 8)
+#define FSPI_STS1_IP_ERRCD(x)		(((u32)(x) << 24))
+#define FSPI_STS1_IP_ERRID(x)		(((u32)(x) << 16))
+#define FSPI_STS1_AHB_ERRCD(x)		(((u32)(x) << 8))
 #define FSPI_STS1_AHB_ERRID(x)		(x)
 
 #define FSPI_STS2			0xE8
@@ -251,16 +251,16 @@
 					 FSPI_STS2_ASLVLOCK)
 
 #define FSPI_AHBSPNST			0xEC
-#define FSPI_AHBSPNST_DATLFT(x)		((x) << 16)
-#define FSPI_AHBSPNST_BUFID(x)		((x) << 1)
+#define FSPI_AHBSPNST_DATLFT(x)		(((u32)(x) << 16))
+#define FSPI_AHBSPNST_BUFID(x)		(((u32)(x) << 1))
 #define FSPI_AHBSPNST_ACTIVE		BIT(0)
 
 #define FSPI_IPRXFSTS			0xF0
-#define FSPI_IPRXFSTS_RDCNTR(x)		((x) << 16)
+#define FSPI_IPRXFSTS_RDCNTR(x)		(((u32)(x) << 16))
 #define FSPI_IPRXFSTS_FILL(x)		(x)
 
 #define FSPI_IPTXFSTS			0xF4
-#define FSPI_IPTXFSTS_WRCNTR(x)		((x) << 16)
+#define FSPI_IPTXFSTS_WRCNTR(x)		(((u32)(x) << 16))
 #define FSPI_IPTXFSTS_FILL(x)		(x)
 
 #define FSPI_RFDR			0x100
