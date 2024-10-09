@@ -68,6 +68,10 @@
 	bootph-pre-ram;
 };
 
+&flexspi1 {
+	bootph-pre-ram;
+};
+
 &pinctrl_uart1 {
 	bootph-pre-ram;
 	bootph-some-ram;
