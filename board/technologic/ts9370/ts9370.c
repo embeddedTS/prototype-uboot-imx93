@@ -16,7 +16,6 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/arch-imx9/imx93_pins.h>
 #include <asm/arch/clock.h>
-#include <power/pmic.h>
 #include <dm/device.h>
 #include <dm/uclass.h>
 #include <usb.h>
@@ -73,8 +72,6 @@ struct efi_capsule_update_info update_info = {
 int board_early_init_f(void)
 {
 	imx_iomux_v3_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
-	imx_iomux_v3_setup_multiple_pads(fpga_pads, ARRAY_SIZE(fpga_pads));
-
 	init_uart_clk(LPUART1_CLK_ROOT);
 
 	/* Pass through USB clock */
@@ -117,11 +114,6 @@ static int setup_eqos(void)
 	return 0;
 }
 
-static void board_gpio_init(void)
-{
-	//imx_iomux_v3_setup_multiple_pads(fpga_pads, ARRAY_SIZE(fpga_pads));
-}
-
 int board_init(void)
 {
 	if (IS_ENABLED(CONFIG_FEC_MXC))
@@ -130,9 +122,6 @@ int board_init(void)
 	if (IS_ENABLED(CONFIG_DWC_ETH_QOS))
 		setup_eqos();
 
-	board_gpio_init();
-
-	imx_iomux_v3_setup_multiple_pads(fpga_pads, ARRAY_SIZE(fpga_pads));
 	return 0;
 }
 
