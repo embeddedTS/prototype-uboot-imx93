@@ -662,6 +662,12 @@ config SLG7XL45106_I2C_GPO
 	   8-bit gpo expander, all gpo lines are controlled by writing
 	   value into data register.
 
+config TS7820_GPIO
+        bool "TS-7820 FPGA GPIO"
+        depends on DM_GPIO
+        help
+           Support for embeddedTS FPGA GPIO
+
 config TURRIS_OMNIA_MCU
 	bool "Turris Omnia MCU GPIO driver"
 	depends on DM_GPIO
