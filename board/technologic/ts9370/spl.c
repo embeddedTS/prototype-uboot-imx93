@@ -88,6 +88,9 @@ void spl_dram_init(void)
 		ptiming = &dram_timing_8gb_3733;
 	} else if (cpu_straps == 0x00fc) { // Option 2
 		ptiming = &dram_timing_16gb_3733;	// Micron 16Gb
+	} else {
+		printf("Read back invalid CPU straps (%d)\n", cpu_straps);
+		while(1);
 	}
 
 	printf("DDR: %uMTS\n", ptiming->fsp_msg[0].drate);
