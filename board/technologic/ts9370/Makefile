@@ -15,3 +15,5 @@ obj-y += ../ts-common/
 endif
 obj-y += ocram_debug.o
 obj-y += parse_straps.o
+obj-y += tsfpga.o
+obj-y += fpga_bootloader.o

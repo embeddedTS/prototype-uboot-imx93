@@ -23,6 +23,8 @@
 #include <asm/gpio.h>
 
 #include "parse_straps.h"
+#include "tsfpga.h"
+#include "fpga_bootloader.h"
 
 #include "../ts-common/ts-macs.h"
 
@@ -125,25 +127,6 @@ int board_init(void)
 	return 0;
 }
 
-static void print_fpga_version(void)
-{
-	uint32_t tag_version = readl((void *)0x28000004);
-	uint32_t git_hash = readl((void *)0x28000008);
-	uint8_t git_dirty = (git_hash >> 31) & 0x1;
-	uint8_t extra = tag_version & 0xFF;
-
-	printf("FPGA: %d.%d.%d",
-	      (tag_version >> 24) & 0xFF,
-	      (tag_version >> 16) & 0xFF,
-	      (tag_version >> 8) & 0xFF);
-
-	if (extra > 0)
-		printf("-%d", extra);
-	if (git_dirty)
-		printf("-dirty");
-	printf("\n");
-}
-
 int board_late_init(void)
 {
 	char rev_as_str[2] = {0};
@@ -174,7 +157,17 @@ int board_late_init(void)
 	board_straps = get_straps();
 	env_set_hex("board_early_straps", board_straps);
 #endif
+
+	fpga_update_from_flash();
+
+	if (!env_get("skip_fpga_reconfig")) {
+		print_fpga_version();
+		fpga_reconfig();
+	} else {
+		printf("Skipping FPGA reconfig\n");
+	}
 	print_fpga_version();
+
 	return 0;
 }
 
