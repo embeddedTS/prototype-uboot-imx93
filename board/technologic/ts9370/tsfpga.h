@@ -9,4 +9,3 @@
 
 bool fpga_is_bootloader(void);
 void print_fpga_version(void);
-void fpga_reconfig(void);

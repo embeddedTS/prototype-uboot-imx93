@@ -73,3 +73,4 @@ int flash_read_app(uint32_t addr, uint32_t len);
 int flash_update_bootloader(uint32_t addr, uint32_t len);
 int flash_read_bootloader(uint32_t addr, uint32_t len);
 int fpga_update_from_flash(void);
+int fpga_reconfig(void);

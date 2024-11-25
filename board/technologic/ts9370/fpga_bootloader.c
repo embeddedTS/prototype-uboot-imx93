@@ -153,9 +153,8 @@ int fpga_update_from_flash(void)
 	res = read_fit_from_flash(&fit);
 	if (res) {
 		/* No pending update */
-		return 1;
+		return 0;
 	}
-
 
 	res = fpga_process_fit_updates(fit);
 	if (res) {
@@ -349,11 +348,11 @@ int flash_read_bootloader(uint32_t addr, uint32_t len)
 	return flash_read(CFM0_BASE, addr, len);
 }
 
-void fpga_reconfig(void)
+int fpga_reconfig(void)
 {
 	if (!fpga_is_bootloader()) {
 		printf("FPGA is already booted\n");
-		return;
+		return 1;
 	}
 
 	writel(UPDATER_RECONFIG_IMAGE_SELECT | UPDATER_RECONFIG_RECONFIG_START,
@@ -363,8 +362,10 @@ void fpga_reconfig(void)
 	if (fpga_is_bootloader()) {
 		printf("FPGA stuck in bootloader\n");
 		writel(UPDATER_RECONFIG_EN_ERROR_LEDS, UPDATER_RECONFIG);
-		return;
+		return 1;
 	}
+
+	return 0;
 }
 
 /* Arbitrary number to take ~1 second */
@@ -458,11 +459,14 @@ static int do_fpgaboot(struct cmd_tbl *cmdtp, int flag, int argc,
 		if (strcmp(argv[1], "info") == 0) {
 			print_fpga_version();
 		} else if (strcmp(argv[1], "start") == 0) {
-			fpga_reconfig();
-		}  else if (strcmp(argv[1], "test") == 0) {
-			fpga_scratch_test();
-		}  else if (strcmp(argv[1], "update") == 0) {
-			fpga_update_from_flash();
+			ret = fpga_reconfig();
+		} else if (strcmp(argv[1], "test") == 0) {
+			ret = fpga_scratch_test();
+		} else if (strcmp(argv[1], "update") == 0) {
+			ret = fpga_update_from_flash();
+		} else if (strcmp(argv[1], "is_bootloader") == 0) {
+			/* Invert to match shell true/false */
+			ret = !fpga_is_bootloader();
 		} else {
 			ret = CMD_RET_USAGE;
 		}
@@ -496,4 +500,5 @@ U_BOOT_CMD(fpgaboot, 5, 1, do_fpgaboot, "fpga bootloader command",
 	   "read_bootloader addr len\n"
 	   "test\n"
 	   "update\n"
+	   "is_bootloader\n"
 	   "start\n");
