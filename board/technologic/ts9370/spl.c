@@ -84,13 +84,10 @@ void spl_dram_init(void)
 		*    |   2 | Micron   | MT53E1G16D1FW-046     | 16 |
 		*    |-----+----------+-----------------------+----|
 		*/
-	if (cpu_straps == 0x00fe) {        // Option 1
+	if (cpu_straps & (1 << 1)) {
 		ptiming = &dram_timing_8gb_3733;
-	} else if (cpu_straps == 0x00fc) { // Option 2
-		ptiming = &dram_timing_16gb_3733;	// Micron 16Gb
 	} else {
-		printf("Read back invalid CPU straps (%d)\n", cpu_straps);
-		while(1);
+		ptiming = &dram_timing_16gb_3733;
 	}
 
 	printf("DDR: %uMTS\n", ptiming->fsp_msg[0].drate);
