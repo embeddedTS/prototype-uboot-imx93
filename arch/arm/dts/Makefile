@@ -1199,6 +1199,7 @@ dtb-$(CONFIG_ARCH_IMX9) += \
 	imx93-var-som-symphony.dtb \
 	imx93-ts9370.dtb \
 	imx93-ts9390.dtb \
+	imx93-ts4300.dtb \
 	imx93-phyboard-segin.dtb
 
 dtb-$(CONFIG_ARCH_IMXRT) += imxrt1050-evk.dtb \
