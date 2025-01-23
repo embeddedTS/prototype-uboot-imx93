@@ -14,20 +14,45 @@
 
 #include "wizard.h"
 
+/*
+ * super_get_i2c_chip - Locate the Wizard, wherever it may be.
+ *
+ * This has to work using the provisional/default device tree; before
+ * the correct device tree for this board model has been selected.
+ *
+ * Will break if something is at the Wizard's address on a bus it
+ * checks before the bus the Wizard resides on.
+ */
 static struct udevice *super_get_i2c_chip(void)
 {
-	struct udevice *chip;
+	static struct udevice *chip;
+	static bool found = 0;
 	struct udevice *bus;
-	int ret;
+	uint16_t le_value;
+        int busses[2] = {3, 0};
+	int i;
+	int ret = 1;
 
-	ret = uclass_get_device_by_seq(UCLASS_I2C, 0, &bus);
+	if (found) {
+		return chip;
+	}
+
+        for (i = 0; i < (sizeof(busses)/sizeof(int)); i++) {
+		ret = uclass_get_device_by_seq(UCLASS_I2C, busses[i], &bus);
+		if (ret)
+			continue;
+		ret = i2c_get_chip(bus, SUPER_I2C_ADDR, 2, &chip);
+		if (ret)
+			continue;
+                ret = dm_i2c_read(chip, wizard_byte_order(0),
+                                  (uint8_t *)&le_value, sizeof(le_value));
+                if (!ret) {
+			break;
+                }
+	}
 	if (ret)
 		return NULL;
-
-	ret = i2c_get_chip(bus, SUPER_I2C_ADDR, 2, &chip);
-	if (ret)
-		return NULL;
-
+	found = 1;
 	return chip;
 }
 
