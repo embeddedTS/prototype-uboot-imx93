@@ -82,6 +82,37 @@ int board_early_init_f(void)
 	return 0;
 }
 
+int board_fit_config_name_match(const char *name)
+{
+	uint16_t board_model_register = 0;
+
+	board_model_register = get_board_model_register_early();
+
+	switch (board_model_register) {
+	case 0x9370:
+		if (!strcmp(name, "imx93-ts9370"))
+			return 0;
+		break;
+	case 0x9390:
+		if (!strcmp(name, "imx93-ts9390"))
+			return 0;
+		break;
+	case 0x4300:
+		if (!strcmp(name, "imx93-ts4300"))
+			return 0;
+		break;
+	case 0x0000:
+		// Default if board_model_register can't be read at this time:
+		if (!strcmp(name, CONFIG_DEFAULT_DEVICE_TREE))
+			return 0;
+		break;
+	default:
+		// -EINVAL if the board model is unrecognized
+		break;
+	}
+	return -EINVAL;
+}
+
 static int setup_fec(void)
 {
 	imx_iomux_v3_setup_multiple_pads(fec_enet_pads, ARRAY_SIZE(fec_enet_pads));
