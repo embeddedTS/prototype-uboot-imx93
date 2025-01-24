@@ -13,7 +13,7 @@ obj-y += lpddr4x-16gb-3733.o lpddr4x-8gb-3733.o
 else
 obj-y += ../ts-common/
 endif
-obj-y += ocram_debug.o
+obj-y += ../tsimx93-common/
 obj-y += parse_straps.o
 obj-y += tsfpga.o
 obj-y += fpga_bootloader.o

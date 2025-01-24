@@ -1,5 +1,12 @@
+/*
+ * Copyright (C) 2024-2025 Technologic Systems dba embeddedTS
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
+ */
 
-#include "parse_straps.h"
+#pragma once
+
+#define OCRAM_DEBUG_AREA_ADDR 0x20487900
 
 extern void ocram_debug_init(void);
 
@@ -18,6 +25,6 @@ typedef struct {
   uint32_t breadcrumb_save_area_end;
 } ocram_debug_t;
 
-extern ocram_debug_t *ocram_debug_area_p;
+extern ocram_debug_t *const global_ocram_debug_area_p;
 
 #define OCRAM_DEBUG_AVAILABLE

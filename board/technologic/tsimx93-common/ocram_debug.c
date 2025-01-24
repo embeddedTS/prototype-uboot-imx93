@@ -8,14 +8,16 @@
 #endif
 int include_stdint;
 #include "linux/types.h"
+
 int include_ocram_debug;
 #include "ocram_debug.h"
 
 // Borrow space from ROM log at 0x2048782c
-ocram_debug_t *ocram_debug_area_p = (ocram_debug_t *) 0x20487900;
+ocram_debug_t *const global_ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
 
 void ocram_debug_init(void)
 {
+        ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
 	if (ocram_debug_area_p->breadcrumb_save_area_begin == 0xfeedbeef)
 		return;
 	ocram_debug_area_p->breadcrumb_save_area_begin = 0xfeedbeef;
