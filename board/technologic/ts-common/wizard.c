@@ -94,3 +94,45 @@ int wizard_read_mac(uint8_t *mac_buffer)
 
 	return ret;
 }
+
+uint16_t get_board_model_register(void)
+{
+	static uint16_t board_model_register = 0;
+	static bool found = 0;
+	int ret;
+
+	if (!found) {
+          ret = super_read(0, &board_model_register);
+          if (!ret) {
+            found = 1;
+          }
+	}
+
+	return board_model_register;
+}
+
+const char *get_board_model(void)
+{
+	static char str_buffer[5] = {0};
+	static bool loaded = 0;
+	uint16_t condensed_register_form;
+
+	if (!loaded) {
+		condensed_register_form = get_board_model_register();
+		snprintf(str_buffer, sizeof(str_buffer), "%04X", condensed_register_form);
+		loaded = 1;
+	}
+	return str_buffer;
+}
+
+const char *get_board_name(void)
+{
+	static char name_str[12] = {0};
+	static bool loaded = 0;
+
+	if (!loaded) {
+		snprintf(name_str, sizeof(name_str), "TS-%s", get_board_model());
+		loaded = 1;
+	}
+	return name_str;
+}

@@ -77,19 +77,6 @@ static iomux_v3_cfg_t const strap_pads[] = {
 	MX93_PAD_GPIO_IO21__GPIO2_IO21 | MUX_PAD_CTRL(STRAP_PAD_PD_CTRL)
 };
 
-const char *get_board_model(void)
-{
-	return "9370";
-}
-
-const char *get_board_name(void)
-{
-	static char name_str[12] = {0};
-
-	snprintf(name_str, sizeof(name_str), "TS-9370");
-	return name_str;
-}
-
 const char get_board_version_char(void)
 {
 	uint16_t raw_cpu_straps = 0;
