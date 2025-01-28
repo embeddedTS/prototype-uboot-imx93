@@ -33,10 +33,9 @@ static struct udevice *super_get_i2c_chip(void)
 
 uint16_t wizard_byte_order(uint16_t addr_value)
 {
-	uint16_t swap_value;
-	swap_value = addr_value >> 8;
-	swap_value |= (addr_value & 0xff) << 8;
-	return swap_value;
+	uint16_t le_value;
+	le_value = addr_value;
+	return le_value;
 }
 
 int super_write(uint16_t addr, uint16_t value)
