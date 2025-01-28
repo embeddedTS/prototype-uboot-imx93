@@ -5,5 +5,6 @@
 #
 
 ifndef CONFIG_SPL_BUILD
-obj-y += ts-macs.o wizard.o
+obj-y += ts-macs.o
 endif
+obj-y += wizard.o

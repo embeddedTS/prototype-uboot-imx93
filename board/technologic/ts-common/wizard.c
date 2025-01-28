@@ -161,3 +161,60 @@ const char *get_board_name(void)
 	}
 	return name_str;
 }
+
+static struct udevice *super_get_i2c_chip_early(void)
+{
+	struct udevice *chip;
+	struct udevice *bus;
+	uint16_t le_value;
+        int busses[2] = {3, 0};
+	int i;
+	int ret = 1;
+
+        for (i = 0; i < (sizeof(busses)/sizeof(int)); i++) {
+		ret = uclass_get_device_by_seq(UCLASS_I2C, busses[i], &bus);
+		if (ret) {
+			continue;
+		}
+		ret = i2c_get_chip(bus, SUPER_I2C_ADDR, 2, &chip);
+		if (ret) {
+			continue;
+		}
+                ret = dm_i2c_read(chip, wizard_byte_order(0),
+                                  (uint8_t *)&le_value, sizeof(le_value));
+                if (!ret) {
+			break;
+                }
+	}
+	if (ret) {
+		return NULL;
+	}
+	return chip;
+}
+
+int super_read_early(uint16_t addr, uint16_t *value)
+{
+	struct udevice *chip;
+	int ret;
+	uint16_t le_value;
+
+	chip = super_get_i2c_chip_early();
+	if (!chip) {
+		return -ENODEV;
+	}
+
+	ret = dm_i2c_read(chip, wizard_byte_order(addr),
+			  (uint8_t *)&le_value, sizeof(le_value));
+	if (ret) {
+		return ret;
+	}
+	*value = wizard_byte_order(le_value);
+	return 0;
+}
+
+uint16_t get_board_model_register_early(void)
+{
+	uint16_t board_model_register = 0;
+	super_read_early(0, &board_model_register);
+	return board_model_register;
+}

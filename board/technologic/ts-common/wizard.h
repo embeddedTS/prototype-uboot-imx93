@@ -44,4 +44,5 @@ int wizard_read_mac(uint8_t *mac_buffer);
 uint16_t wizard_byte_order(uint16_t addr_value);
 
 uint16_t get_board_model_register(void);
+uint16_t get_board_model_register_early(void);
 #endif // __SUPER_H__
