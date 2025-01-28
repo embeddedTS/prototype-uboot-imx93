@@ -194,8 +194,8 @@ uint16_t read_raw_cpu_straps(void)
 #ifndef CONFIG_SPL_BUILD
 static uint16_t read_straps_preserved_by_spl(void)
 {
-	static uint32_t tmp_save_intermediate = 0;
         ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
+	uint32_t tmp_save_intermediate = 0;
 	tmp_save_intermediate = ocram_debug_area_p->spl_saved_straps;
 	return tmp_save_intermediate;
 }
@@ -203,12 +203,10 @@ static uint16_t read_straps_preserved_by_spl(void)
 
 static void preserve_straps(uint16_t straps)
 {
-	static uint32_t tmp_save_intermediate = 0;
-	tmp_save_intermediate |= straps;
         ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
 #ifdef CONFIG_SPL_BUILD
-	ocram_debug_area_p->spl_saved_straps = tmp_save_intermediate;
+	ocram_debug_area_p->spl_saved_straps |= straps;
 #else
-	ocram_debug_area_p->saved_straps = tmp_save_intermediate;
+	ocram_debug_area_p->saved_straps |= straps;
 #endif
 }
