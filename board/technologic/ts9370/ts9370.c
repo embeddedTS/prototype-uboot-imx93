@@ -38,16 +38,22 @@ static iomux_v3_cfg_t const uart_pads[] = {
 	MX93_PAD_UART1_TXD__LPUART1_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
 };
 
+#if CONFIG_IS_ENABLED(DWC_ETH_QOS)
+static int setup_eqos(void);
 static iomux_v3_cfg_t const fpga_pads[] = {
 	MX93_PAD_GPIO_IO02__GPIO2_IO02 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // DEV_CLRN / GPIO_02
 	MX93_PAD_GPIO_IO11__GPIO2_IO11 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // NSTATUS / GPIO_11
 	MX93_PAD_GPIO_IO10__GPIO2_IO10 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // CONF_DONE / GPIO_10
 };
+#endif
 
+#if CONFIG_IS_ENABLED(FEC_MXC)
+static int setup_fec(void);
 static iomux_v3_cfg_t const fec_enet_pads[] = {
 	MX93_PAD_SD3_DATA3__GPIO3_IO25 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // ETH2_RESET#
 	MX93_PAD_SD3_DATA2__GPIO3_IO24 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // ETH1_RESET#
 };
+#endif
 
 #if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
 #define IMX_BOOT_IMAGE_GUID \
@@ -113,12 +119,14 @@ int board_fit_config_name_match(const char *name)
 	return -EINVAL;
 }
 
+#if CONFIG_IS_ENABLED(FEC_MXC)
 static int setup_fec(void)
 {
 	imx_iomux_v3_setup_multiple_pads(fec_enet_pads, ARRAY_SIZE(fec_enet_pads));
 
 	return set_clk_enet(ENET_125MHZ);
 }
+#endif
 
 int board_phy_config(struct phy_device *phydev)
 {
@@ -128,6 +136,7 @@ int board_phy_config(struct phy_device *phydev)
 	return 0;
 }
 
+#if CONFIG_IS_ENABLED(DWC_ETH_QOS)
 static int setup_eqos(void)
 {
 	struct blk_ctrl_wakeupmix_regs *bctrl =
@@ -146,6 +155,7 @@ static int setup_eqos(void)
 
 	return 0;
 }
+#endif
 
 int board_init(void)
 {
