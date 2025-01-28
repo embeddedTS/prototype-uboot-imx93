@@ -26,6 +26,8 @@
 #include "tsfpga.h"
 #include "fpga_bootloader.h"
 
+#include <dm/root.h>
+#include "../ts-common/wizard.h"
 #include "../ts-common/ts-macs.h"
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -159,11 +161,33 @@ static int setup_eqos(void)
 
 int board_init(void)
 {
-	if (IS_ENABLED(CONFIG_FEC_MXC))
-		setup_fec();
+#if CONFIG_IS_ENABLED(DTB_RESELECT)
+	int rescan;
+	int ret;
+#  if !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO_LATE) && !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO)
+	const char *model;
+#  endif
 
-	if (IS_ENABLED(CONFIG_DWC_ETH_QOS))
-		setup_eqos();
+	ret = fdtdec_resetup(&rescan);
+        if (!ret && rescan) {
+		dm_uninit();
+		dm_init_and_scan(false);
+	}
+#  if !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO_LATE) && !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO)
+	model = fdt_getprop(gd->fdt_blob, 0, "model", NULL);
+	if (model) {
+		printf("Model: %s\n", model);
+	}
+#  endif
+#endif
+
+#if CONFIG_IS_ENABLED(FEC_MXC)
+	setup_fec();
+#endif
+
+#if CONFIG_IS_ENABLED(DWC_ETH_QOS)
+	setup_eqos();
+#endif
 
 	return 0;
 }
@@ -211,6 +235,15 @@ int board_late_init(void)
 
 	return 0;
 }
+
+#ifdef CONFIG_DTB_RESELECT
+int embedded_dtb_select(void)
+{
+	// If CONFIG_DISPLAY_BOARDINFO!=n, you'll see "Model: TS-4300" until board_init() runs
+	fdtdec_setup();
+	return 0;
+}
+#endif
 
 #ifdef CONFIG_FSL_FASTBOOT
 #ifdef CONFIG_ANDROID_RECOVERY
