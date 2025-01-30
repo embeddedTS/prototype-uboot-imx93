@@ -35,6 +35,7 @@ void setup_mac_addresses(void)
 	bool from_env = 0;
 
 	ret = wizard_read_mac(enetaddr);
+
 	if (!ret && is_valid_ethaddr(enetaddr)) {
 		from_wizard = 1;
 	} else if (!ret && !is_valid_ethaddr(enetaddr)) {
