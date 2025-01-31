@@ -68,7 +68,6 @@ int super_write(uint16_t addr, uint16_t value)
 	if (!chip)
 		return -ENODEV;
 
-	value = cpu_to_be16(value);
 	return dm_i2c_write(chip, cpu_to_be16(addr), (uint8_t *)&value, 2);
 }
 
@@ -88,7 +87,6 @@ int super_read(uint16_t addr, uint16_t *value)
 		printf("Error: dm_i2c_read failed, ret=%d\n", ret);
 		return ret;
 	}
-	*value = cpu_to_be16(*value);
 
 	return 0;
 }
