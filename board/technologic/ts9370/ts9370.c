@@ -192,6 +192,29 @@ int board_init(void)
 	return 0;
 }
 
+static void findfdt(void)
+{
+    uint16_t model = get_board_model_register();
+    const char *fdtfile = NULL;
+
+    switch (model) {
+    case 0x4300:
+        fdtfile = "imx93-ts4300.dtb";
+        break;
+    case 0x9390:
+        fdtfile = "imx93-ts9390.dtb";
+        break;
+    case 0x9370:
+        fdtfile = "imx93-ts9370.dtb";
+        break;
+    default:
+		printf("Unknown model 0x%X, can't set fdtfile\n", model);
+        break;
+    }
+
+    env_set("fdtfile", fdtfile);
+}
+
 int board_late_init(void)
 {
 	char rev_as_str[2] = {0};
@@ -223,6 +246,7 @@ int board_late_init(void)
 	env_set_hex("board_early_straps", board_straps);
 #endif
 
+	findfdt();
 	fpga_update_from_flash();
 
 	if (!env_get("skip_fpga_reconfig")) {
