@@ -106,8 +106,8 @@ int wizard_read_mac(uint8_t *mac_buffer)
 			       reg_addr, ret);
 			break;
 		}
-		mac_buffer[2*(2-n_words)] = (word >> 8) & 0xff;
-		mac_buffer[2*(2-n_words)+1] = word & 0xff;
+		mac_buffer[2*(2-n_words)] = word & 0xff;
+		mac_buffer[2*(2-n_words)+1] = (word >> 8) & 0xff;
 		reg_addr += 1;
 	}
 
