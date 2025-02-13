@@ -174,6 +174,7 @@ struct ddrphy_qb_state {
 #endif /* #elif defined(CONFIG_IMX95) */
 
 void ddr_load_train_firmware(enum fw_type type);
+int ddr_read_mr_info(struct dram_timing_info *preliminary_timing_info);
 int ddr_init(struct dram_timing_info *timing_info);
 int ddr_cfg_phy(struct dram_timing_info *timing_info);
 void load_lpddr4_phy_pie(void);

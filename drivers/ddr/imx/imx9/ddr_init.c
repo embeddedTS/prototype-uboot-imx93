@@ -1,3 +1,4 @@
+//#define DEBUG
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2022 NXP
@@ -352,12 +353,96 @@ void save_trained_mr12_14(struct dram_cfg_param *cfg, u32 cfg_num, u32 mr12, u32
 	}
 }
 
+int ddr_read_mr_info(struct dram_timing_info *dram_timing)
+{
+	unsigned int initial_drate;
+	struct dram_timing_info *saved_timing;
+	void *fsp;
+	int i, ret;
+	u32 mr0, mr5, mr6, mr7, mr8;
+	u32 mr12, mr14;
+	u32 regval;
+	struct dram_cfg_param *ddrc_cfg;
+	unsigned int ddrc_cfg_num;
+
+	printf("READ_MR_INFO: start DRAM init\n");
+        // without quickboot support (we don't select it)
+        
+	/* reset ddrphy */
+	ddrphy_coldreset();
+
+	debug("READ_MR_INFO: cfg clk\n");
+
+	initial_drate = dram_timing->fsp_msg[0].drate;
+	/* default to the frequency point 0 clock */
+	ddrphy_init_set_dfi_clk(initial_drate);
+
+	/*
+	 * Start PHY initialization and training by
+	 * accessing relevant PUB registers
+	 */
+	debug("READ_MR_INFO:ddrphy config start\n");
+
+	ret = ddr_cfg_phy(dram_timing);
+	if (ret)
+		return ret;
+
+	/* save the ddr PHY trained CSR in memory for low power use */
+	ddrphy_trained_csr_save(ddrphy_trained_csr, ddrphy_trained_csr_num);
+
+	debug("READ_MR_INFO: ddrphy config done\n");
+
+	update_umctl2_rank_space_setting(dram_timing, dram_timing->fsp_msg_num - 1);
+
+	/* program the ddrc registers */
+	debug("READ_MR_INFO: ddrc config start\n");
+	ddrc_config(dram_timing);
+	debug("READ_MR_INFO: ddrc config done\n");
+
+#ifdef CONFIG_IMX9_DRAM_PM_COUNTER
+	writel(0x200000, REG_DDR_DEBUG_19);
+#endif
+
+	check_dfi_init_complete();
+
+	regval = readl(REG_DDR_SDRAM_CFG);
+	writel((regval | 0x80000000), REG_DDR_SDRAM_CFG);
+
+	debug("READ_MR_INFO: ddrc idle check start\n");
+	check_ddrc_idle();
+	debug("READ_MR_INFO: ddrc idle check done\n");
+
+	/* if DRAM Data INIT set, wait it be completed */
+	ddrc_cfg = dram_timing->ddrc_cfg;
+	ddrc_cfg_num = dram_timing->ddrc_cfg_num;
+	for (i = 0; i < ddrc_cfg_num; i++) {
+		if (ddrc_cfg->reg == REG_DDR_SDRAM_CFG2) {
+			if (ddrc_cfg->val & 0x10) {
+				while (readl(REG_DDR_SDRAM_CFG2) & 0x10)
+					;
+			}
+			break;
+		}
+		ddrc_cfg++;
+	}
+
+	mr0 = lpddr4_mr_read(1, 0);
+	mr5 = lpddr4_mr_read(1, 5);
+	mr6 = lpddr4_mr_read(1, 6);
+	mr7 = lpddr4_mr_read(1, 7);
+	mr8 = lpddr4_mr_read(1, 8);
+        debug("READ_MR_INFO: lpddr4_mr_read results: "
+	      "mr0=%02x, mr5=%02x, mr6=%02x, mr7=%02x, mr8=%02x\n", mr0, mr5, mr6, mr7, mr8);
+	return 0;
+}
+
 int ddr_init(struct dram_timing_info *dram_timing)
 {
 	unsigned int initial_drate;
 	struct dram_timing_info *saved_timing;
 	void *fsp;
 	int i, ret;
+	u32 mr0, mr5, mr6, mr7, mr8;
 	u32 mr12, mr14;
 	u32 regval;
 	struct dram_cfg_param *ddrc_cfg;
@@ -419,9 +504,12 @@ int ddr_init(struct dram_timing_info *dram_timing)
 	regval = readl(REG_DDR_SDRAM_CFG);
 	writel((regval | 0x80000000), REG_DDR_SDRAM_CFG);
 
+	debug("DDRINFO: ddrc idle check start\n");
 	check_ddrc_idle();
+	debug("DDRINFO: ddrc idle check done\n");
 
 	/* if DRAM Data INIT set, wait it be completed */
+	debug("DDRINFO: wait for data init complate (start)\n");
 	ddrc_cfg = dram_timing->ddrc_cfg;
 	ddrc_cfg_num = dram_timing->ddrc_cfg_num;
 	for (i = 0; i < ddrc_cfg_num; i++) {
@@ -434,12 +522,23 @@ int ddr_init(struct dram_timing_info *dram_timing)
 		}
 		ddrc_cfg++;
 	}
+	debug("DDRINFO: wait for data init complate (done)\n");
 
 	mr12 = lpddr4_mr_read(1, 12);
 	mr14 = lpddr4_mr_read(1, 14);
 
+	mr0 = lpddr4_mr_read(1, 0);
+	mr5 = lpddr4_mr_read(1, 5);
+	mr6 = lpddr4_mr_read(1, 6);
+	mr7 = lpddr4_mr_read(1, 7);
+	mr8 = lpddr4_mr_read(1, 8);
+        debug("DDRINFO: lpddr4_mr_read results: "
+	      "mr0=%02x, mr5=%02x, mr6=%02x, mr7=%02x, mr8=%02x, mr12=%02x, mr14=%02x\n", mr0, mr5, mr6, mr7, mr8, mr12, mr14);
+
 	/* save the dram timing config into memory */
+	debug("DDRINFO: save dram timing config into memory (start)\n");
 	fsp = dram_config_save(dram_timing, CONFIG_SAVED_DRAM_TIMING_BASE);
+	debug("DDRINFO: save dram timing config into memory (done)\n");
 
 	saved_timing = (struct dram_timing_info *)CONFIG_SAVED_DRAM_TIMING_BASE;
 	saved_timing->fsp_cfg = fsp;
@@ -463,6 +562,7 @@ int ddr_init(struct dram_timing_info *dram_timing)
 	memcpy((struct ddrphy_qb_state *)CONFIG_SAVED_QB_STATE_BASE,
 		&qb_state, sizeof(struct ddrphy_qb_state));
 #endif
+	debug("DDRINFO: DRAM init complete\n");
 	return 0;
 }
 

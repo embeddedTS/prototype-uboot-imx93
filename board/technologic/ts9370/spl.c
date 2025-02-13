@@ -76,6 +76,9 @@ void spl_dram_init(void)
 	uint16_t resistor_straps = read_raw_cpu_straps();
 
 #undef READ_MRS
+#ifdef READ_MRS
+        ddr_read_mr_info(&dram_timing_8gb_3733);
+#endif
 
 	/*
 	 * DRAM size can is read from the strapping resistors.
