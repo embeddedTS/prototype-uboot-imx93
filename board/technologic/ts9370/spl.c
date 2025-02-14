@@ -68,25 +68,46 @@ void spl_board_init(void)
 }
 
 extern struct dram_timing_info dram_timing_16gb_3733;
+extern struct dram_timing_info dram_timing_half_16gb_3733;
 extern struct dram_timing_info dram_timing_8gb_3733;
 void spl_dram_init(void)
 {
 	struct dram_timing_info *ptiming;
-	uint16_t cpu_straps = read_raw_cpu_straps();
+	uint16_t resistor_straps = read_raw_cpu_straps();
+
+#undef READ_MRS
 
 	/*
-		* DRAM size can is read from the strapping resistors.
-		* See sheet 2 of the schematic.
-		*
-		*    | GiB | Manuf.   | Manuf. PN             | Gb |
-		*    |-----+----------+-----------------------+----|
-		*    |   1 | Alliance | AS4C512M16MD4V-053BIN |  8 |
-		*    |   2 | Micron   | MT53E1G16D1FW-046     | 16 |
-		*    |-----+----------+-----------------------+----|
-		*/
-	if (cpu_straps & (1 << 1)) {
+	 * DRAM size can is read from the strapping resistors.
+	 * See sheet 2 of the schematic.
+	 *
+	 *    | GiB  | Manuf.   | Manuf. PN             | Gb |
+	 *    |------+----------+-----------------------+----|
+	 *    |   1  | Alliance | AS4C512M16MD4V-053BIN |  8 |
+	 *    |   2  | Micron   | MT53E1G16D1FW-046     | 16 |
+	 *    |   2* | Alliance | AS4C1G16MD4V-046BIN   | 16 |
+	 *    |----- +----------+-----------------------+----|
+	 *    * limited to 1 GB at least through 9370/P3, 9390/P2, 4300/P2
+	 */
+	if (resistor_straps & (1 << 1)) {
+#ifndef READ_MRS
+		printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
+#endif
 		ptiming = &dram_timing_8gb_3733;
+	} else if ((resistor_straps & (1 << 2)) == 0) {
+		/*
+		 * In the future, this will be 2GB (dual-rank 16gb) as
+		 * long as we know this board has ZQ1 connected for
+		 * the second rank.
+		 */
+#ifndef READ_MRS
+		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n", resistor_straps);
+#endif
+		ptiming = &dram_timing_half_16gb_3733;
 	} else {
+#ifndef READ_MRS
+		printf("DDR: 2 GB, resistor_straps=%04x\n", resistor_straps);
+#endif
 		ptiming = &dram_timing_16gb_3733;
 	}
 

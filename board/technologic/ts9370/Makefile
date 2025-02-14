@@ -9,7 +9,7 @@ obj-y += ../../../board/freescale/common/
 
 ifdef CONFIG_SPL_BUILD
 obj-y += spl.o
-obj-y += lpddr4x-16gb-3733.o lpddr4x-8gb-3733.o
+obj-y += lpddr4x-16gb-3733.o lpddr4x-alliance-8gb-3733.o
 endif
 obj-y += ../tsimx93-common/
 obj-y += ../ts-common/
