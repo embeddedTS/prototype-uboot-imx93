@@ -343,7 +343,7 @@
 
 			gpio-line-names =
 				"EN_2ND_PORT_232",   "EN_CAN_1",    "EN_CAN_2",      "",
-				"",                  "",            "",              "",
+				"USB_HUB_RESET#",    "",            "",              "",
 				"",                  "",            "",              "",
 				"",                  "",            "",              "",
 				"",                  "",            "",              "",
@@ -669,12 +669,11 @@
 	usb@1 {
 		compatible = "usb424,2514";
 		reg = <1>;
-		//pinctrl-names = "default";
-		//pinctrl-0 = <&pinctrl_usbhub>;
 		clocks = <&clk IMX93_CLK_CCM_CKO1>;
 		assigned-clocks = <&clk IMX93_CLK_CCM_CKO1>;
 		assigned-clock-parents = <&clk IMX93_CLK_24M>;
 		assigned-clock-rates = <24000000>;
+		reset-gpios = <&fpga_gpio1 4 GPIO_ACTIVE_LOW>;
 	};
 };
 
