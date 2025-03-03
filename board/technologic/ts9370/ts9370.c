@@ -84,7 +84,7 @@ int board_early_init_f(void)
 	imx_iomux_v3_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
 	init_uart_clk(LPUART1_CLK_ROOT);
 
-	/* Pass through USB clock */
+	// Emit a clock for the onboard USB hub
 	ccm_clk_root_cfg(CCM_CKO1_CLK_ROOT, OSC_24M_CLK, 1);
 
 	return 0;
@@ -256,6 +256,21 @@ int board_late_init(void)
 		printf("Skipping FPGA reconfig\n");
 	}
 	print_fpga_version();
+
+        if (get_board_model_register() == 0x9390) {
+		/*
+		 * Take the onboard USB hub out of reset (USB_HUB_RESET#; bank 1 bit 4)
+		 *
+		 * Initially only the 9390 P2 needs this, not the 9370 P3.
+		 *
+		 * The P4 9370, though, will not pass the USB clock
+		 * through the FPGA (and make this a GPIO) like the P2
+		 * 9390 did, at which point everything that isn't a
+		 * 0x4300 will need to do this.
+		 */
+		writel((readl(FPGA_GPIO_BANK_DATA_OUT_ADDR(1)) | (1 << 4)),
+		       FPGA_GPIO_BANK_DATA_OUT_ADDR(1));
+	}
 
 	return 0;
 }
