@@ -259,12 +259,12 @@ int board_late_init(void)
 
 	if (get_board_model_register() == 0x9370 ||
 		get_board_model_register() == 0x9390) {
-		/*
-		 * Take the onboard USB hub out of reset (USB_HUB_RESET#; bank 1 bit 4)
-		 * This is the same on the 9370/9390, not needed on the 4300
-		 */
-		writel((readl(FPGA_GPIO_BANK_DATA_OUT_ADDR(1)) | (1 << 4)),
-		       FPGA_GPIO_BANK_DATA_OUT_ADDR(1));
+		/* Take USB HUB out of reset */
+		writel(1 << 4, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
+
+		/* Turn on power to USB ports */
+		writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
+		writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
 	}
 
 	return 0;
