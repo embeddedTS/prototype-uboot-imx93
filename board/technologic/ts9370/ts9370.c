@@ -169,7 +169,7 @@ int board_init(void)
 #  endif
 
 	ret = fdtdec_resetup(&rescan);
-        if (!ret && rescan) {
+	if (!ret && rescan) {
 		dm_uninit();
 		dm_init_and_scan(false);
 	}
@@ -194,25 +194,25 @@ int board_init(void)
 
 static void findfdt(void)
 {
-    uint16_t model = get_board_model_register();
-    const char *fdtfile = NULL;
+	uint16_t model = get_board_model_register();
+	const char *fdtfile = NULL;
 
-    switch (model) {
-    case 0x4300:
-        fdtfile = "imx93-ts4300.dtb";
-        break;
-    case 0x9390:
-        fdtfile = "imx93-ts9390.dtb";
-        break;
-    case 0x9370:
-        fdtfile = "imx93-ts9370.dtb";
-        break;
-    default:
+	switch (model) {
+	case 0x4300:
+		fdtfile = "imx93-ts4300.dtb";
+		break;
+	case 0x9390:
+		fdtfile = "imx93-ts9390.dtb";
+		break;
+	case 0x9370:
+		fdtfile = "imx93-ts9370.dtb";
+		break;
+	default:
 		printf("Unknown model 0x%X, can't set fdtfile\n", model);
-        break;
-    }
+		break;
+	}
 
-    env_set("fdtfile", fdtfile);
+	env_set("fdtfile", fdtfile);
 }
 
 int board_late_init(void)
