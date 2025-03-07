@@ -257,16 +257,11 @@ int board_late_init(void)
 	}
 	print_fpga_version();
 
-        if (get_board_model_register() == 0x9390) {
+	if (get_board_model_register() == 0x9370 ||
+		get_board_model_register() == 0x9390) {
 		/*
 		 * Take the onboard USB hub out of reset (USB_HUB_RESET#; bank 1 bit 4)
-		 *
-		 * Initially only the 9390 P2 needs this, not the 9370 P3.
-		 *
-		 * The P4 9370, though, will not pass the USB clock
-		 * through the FPGA (and make this a GPIO) like the P2
-		 * 9390 did, at which point everything that isn't a
-		 * 0x4300 will need to do this.
+		 * This is the same on the 9370/9390, not needed on the 4300
 		 */
 		writel((readl(FPGA_GPIO_BANK_DATA_OUT_ADDR(1)) | (1 << 4)),
 		       FPGA_GPIO_BANK_DATA_OUT_ADDR(1));
