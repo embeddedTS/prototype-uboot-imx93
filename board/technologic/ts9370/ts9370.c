@@ -267,6 +267,9 @@ int board_late_init(void)
 		writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
 	}
 
+	/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
+	writel(1 << 2, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
+
 	return 0;
 }
 
