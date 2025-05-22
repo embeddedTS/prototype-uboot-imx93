@@ -15,50 +15,31 @@
 static void increment_mac(uint8_t *);
 
 /*
- * setup_mac_addresses -- for whatever this board requires.
- *
- * Obtain at least the first MAC from the most viable source, then
- * increment it to assign each additional MAC needed by this platform.
- *
- * The first MAC address should come from the Wizard (aka
- * configuration EEPROM) if possible, fallback to the environment if
- * not, and if not even the environment has a valid MAC, set nothing
- * and let a random one be assigned further down the line.
+ * Obtain at least the first MAC then increment it to assign each additional
+ * MAC needed by this platform.
  */
-
-void setup_mac_addresses(void)
+void setup_mac_addresses(int n_macs)
 {
 	unsigned char enetaddr[6];
-	int ret, i;
 	char mac_str[16];
-	bool from_wizard = 0;
-	bool from_env = 0;
+	int ret, i;
 
 	ret = wizard_read_mac(enetaddr);
-
-	if (!ret && is_valid_ethaddr(enetaddr)) {
-		from_wizard = 1;
-	} else if (!ret && !is_valid_ethaddr(enetaddr)) {
-		printf("Valid MAC not found in configuration EEPROM!\n");
-	} else if (ret) {
-		printf("Error reading configuration EEPROM!\n");
-		ret = eth_env_get_enetaddr("ethaddr", enetaddr);
-		if (!ret && is_valid_ethaddr(enetaddr)) {
-			printf("Valid MAC found in environment\n");
-			from_env = 1;
-		} else {
-			printf("Valid MAC not found in environment!\n");
-		}
+	if (ret) {
+		printf("Error reading MAC Address from the Wizard!\n");
+		return;
 	}
 
-	if (from_wizard)
-		eth_env_set_enetaddr("ethaddr", enetaddr);
-	else if (!from_env)
+	if (!is_valid_ethaddr(enetaddr)) {
+		printf("Read an invalid MAC Address from the Wizard!\n");
 		return;
+	}
 
-	for (i = 1; i < N_MAC_ADDRS; i++) {
+	eth_env_set_enetaddr("ethaddr", enetaddr);
+
+	for (i = 0; i < n_macs; i++) {
 		increment_mac(enetaddr);
-		snprintf(mac_str, sizeof(mac_str), "eth%daddr", i);
+		snprintf(mac_str, sizeof(mac_str), "eth%daddr", i + 1);
 		eth_env_set_enetaddr(mac_str, enetaddr);
 	}
 }
