@@ -21,6 +21,7 @@
 #include <usb.h>
 #include <dwc3-uboot.h>
 #include <asm/gpio.h>
+#include <linux/delay.h>
 
 #include "parse_straps.h"
 #include "tsfpga.h"
@@ -220,6 +221,9 @@ int board_late_init(void)
 	char rev_as_str[2] = {0};
 	uint32_t cpu_straps;
 	uint32_t board_straps;
+	uint16_t model;
+
+	model = get_board_model_register();
 
 	setup_mac_addresses();
 #ifdef CONFIG_ENV_IS_IN_MMC
@@ -241,7 +245,7 @@ int board_late_init(void)
 	rev_as_str[0] = get_board_version_char();
 	env_set("board_rev", rev_as_str);
 	env_set("board_rev_name", get_board_version_str());
-	env_set("board_rev_straps", get_straps_str());
+	env_set_hex("board_rev_straps", get_straps());
 	board_straps = get_straps();
 	env_set_hex("board_early_straps", board_straps);
 #endif
@@ -257,14 +261,21 @@ int board_late_init(void)
 	}
 	print_fpga_version();
 
-	if (get_board_model_register() == 0x9370 ||
-		get_board_model_register() == 0x9390) {
+	if (model == 0x9370 || model == 0x9390) {
 		/* Take USB HUB out of reset */
 		writel(1 << 4, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
 
 		/* Turn on power to USB ports */
 		writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
 		writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
+	} else if (model == 0x4300) {
+		/* Drive EN_USB_HOST_5V high */
+		writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
+
+		/* Pulse OFF_BD_RESET# for 1ms */
+		writel(1 << 6, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
+		mdelay(1);
+		writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
 	}
 
 	/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/

@@ -4,10 +4,6 @@
  * SPDX-License-Identifier:     GPL-2.0+
  */
 
-/*
- * Knowledge of TS-9370 strapping is encapsulated in this file.
- */
-
 #include <vsprintf.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/arch-imx9/imx93_pins.h>
@@ -24,7 +20,7 @@
 #define	UART6_TXD	IMX_GPIO_NR(1, 4)	/* R131 / Bit 7 */
 #define	UART7_HS	IMX_GPIO_NR(1, 10)	/* R133 / Bit 6 */
 #define	UART3_TXD	IMX_GPIO_NR(1, 14)	/* R133 / Bit 5 */
-#define	UART5_TXD	IMX_GPIO_NR(1, 0)	/* R134 / Bit 4  */
+#define	UART5_TXD	IMX_GPIO_NR(1, 0)	/* R134 / Bit 4 */
 #define	UART8_TXD	IMX_GPIO_NR(1, 12)	/* R127 / Bit 3 */
 #define	UART7_TXD	IMX_GPIO_NR(1, 8)	/* R128 / Bit 2 */
 #define	SPI_CSn		IMX_GPIO_NR(1, 18)	/* R129 / Bit 1 */
@@ -93,21 +89,11 @@ uint32_t get_straps(void)
 	return raw_cpu_straps;
 }
 
-const char *get_straps_str(void)
-{
-	uint16_t raw_cpu_straps = 0;
-	static char straps_str[10] = {0};
-
-	raw_cpu_straps =  read_raw_cpu_straps();
-	snprintf(straps_str, sizeof(straps_str), "%04x", raw_cpu_straps);
-	return straps_str;
-}
-
 const char *get_board_version_str(void)
 {
 	static char model_str[24] = {0};
 
-	snprintf(model_str, sizeof(model_str), "P3");
+	snprintf(model_str, sizeof(model_str), "PROTO");
 	return model_str;
 }
 
@@ -123,15 +109,14 @@ static uint16_t gpio_bits_to_straps(void)
 {
 	uint16_t cpu_straps = 0;
 
-	cpu_straps |= (gpio_get_value(UART6_TXD) << 7);  // GPIO_4
-	cpu_straps |= (gpio_get_value(UART7_HS) << 6);   // GPIO_10
-	cpu_straps |= (gpio_get_value(UART3_TXD) << 5);  // GPIO_14
-	cpu_straps |= (gpio_get_value(UART5_TXD) << 4);  // GPIO_0
-	cpu_straps |= (gpio_get_value(UART8_TXD) << 3);  // GPIO_12
-	cpu_straps |= (gpio_get_value(UART7_TXD) << 2);  // GPIO_8
-	cpu_straps |= (gpio_get_value(SPI_CSn) << 1);     // GPIO_18
-	cpu_straps |= (gpio_get_value(SPI_MOSILK) << 0);  // GPIO_20
-	cpu_straps &= 0x00ff;
+	cpu_straps |= (gpio_get_value(UART6_TXD) << 7);		// GPIO_4
+	cpu_straps |= (gpio_get_value(UART7_HS) << 6);		// GPIO_10
+	cpu_straps |= (gpio_get_value(UART3_TXD) << 5);		// GPIO_14
+	cpu_straps |= (gpio_get_value(UART5_TXD) << 4);		// GPIO_0
+	cpu_straps |= (gpio_get_value(UART8_TXD) << 3);		// GPIO_12
+	cpu_straps |= (gpio_get_value(UART7_TXD) << 2);		// GPIO_8
+	cpu_straps |= (gpio_get_value(SPI_CSn) << 1);		// GPIO_18
+	cpu_straps |= (gpio_get_value(SPI_MOSILK) << 0);	// GPIO_20
 	return cpu_straps;
 }
 
@@ -152,8 +137,6 @@ uint16_t read_raw_cpu_straps(void)
 		gpio_request(SPI_CSn, "SPI_CSn");	/* R129 / (1, 18) */
 		gpio_request(SPI_MOSILK, "SPI_MOSILK");	/* R130 / (1, 20) */
 
-		mdelay(1);
-
 		gpio_direction_input(UART6_TXD);
 		gpio_direction_input(UART7_HS);
 		gpio_direction_input(UART3_TXD);
@@ -162,8 +145,6 @@ uint16_t read_raw_cpu_straps(void)
 		gpio_direction_input(UART7_TXD);
 		gpio_direction_input(SPI_CSn);
 		gpio_direction_input(SPI_MOSILK);
-
-		mdelay(1);
 
 		cpu_straps = gpio_bits_to_straps();
 		/*
@@ -194,7 +175,7 @@ uint16_t read_raw_cpu_straps(void)
 #ifndef CONFIG_SPL_BUILD
 static uint16_t read_straps_preserved_by_spl(void)
 {
-        ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
+	ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
 	uint32_t tmp_save_intermediate = 0;
 	tmp_save_intermediate = ocram_debug_area_p->spl_saved_straps;
 	return tmp_save_intermediate;
@@ -203,7 +184,7 @@ static uint16_t read_straps_preserved_by_spl(void)
 
 static void preserve_straps(uint16_t straps)
 {
-        ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
+	ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
 #ifdef CONFIG_SPL_BUILD
 	ocram_debug_area_p->spl_saved_straps |= straps;
 #else

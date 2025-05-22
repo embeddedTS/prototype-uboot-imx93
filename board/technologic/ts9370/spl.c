@@ -19,7 +19,6 @@
 #include <asm/arch/sys_proto.h>
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/mach-imx/mxc_i2c.h>
-//#include <asm/arch-mx7ulp/gpio.h>
 #include <asm/mach-imx/ele_api.h>
 #include <asm/mach-imx/syscounter.h>
 #include <asm/sections.h>
@@ -37,6 +36,7 @@
 
 #include <asm/gpio.h>
 #include "parse_straps.h"
+#include "../ts-common/wizard.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -74,11 +74,7 @@ void spl_dram_init(void)
 {
 	struct dram_timing_info *ptiming;
 	uint16_t resistor_straps = read_raw_cpu_straps();
-
-#undef READ_MRS
-#ifdef READ_MRS
-        ddr_read_mr_info(&dram_timing_8gb_3733);
-#endif
+	uint16_t model = get_board_model_register();
 
 	/*
 	 * DRAM size can is read from the strapping resistors.
@@ -92,26 +88,27 @@ void spl_dram_init(void)
 	 *    |----- +----------+-----------------------+----|
 	 *    * limited to 1 GB at least through 9370/P3, 9390/P2, 4300/P2
 	 */
-	if (resistor_straps & (1 << 1)) {
-#ifndef READ_MRS
-		printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
-#endif
-		ptiming = &dram_timing_8gb_3733;
-	} else if ((resistor_straps & (1 << 2)) == 0) {
-		/*
-		 * In the future, this will be 2GB (dual-rank 16gb) as
-		 * long as we know this board has ZQ1 connected for
-		 * the second rank.
-		 */
-#ifndef READ_MRS
-		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n", resistor_straps);
-#endif
+
+	if (model == 0x4300) {
 		ptiming = &dram_timing_half_16gb_3733;
+		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n", resistor_straps);
 	} else {
-#ifndef READ_MRS
-		printf("DDR: 2 GB, resistor_straps=%04x\n", resistor_straps);
-#endif
-		ptiming = &dram_timing_16gb_3733;
+		/* TS-9370 / TS-9390 prototypes */
+		if (resistor_straps & (1 << 1)) {
+			printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
+			ptiming = &dram_timing_8gb_3733;
+		} else if ((resistor_straps & (1 << 2)) == 0) {
+			/*
+			* In the future, this will be 2GB (dual-rank 16gb) as
+			* long as we know this board has ZQ1 connected for
+			* the second rank.
+			*/
+			printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n", resistor_straps);
+			ptiming = &dram_timing_half_16gb_3733;
+		} else {
+			printf("DDR: 2 GB, resistor_straps=%04x\n", resistor_straps);
+			ptiming = &dram_timing_16gb_3733;
+		}
 	}
 
 	printf("DDR: %uMTS\n", ptiming->fsp_msg[0].drate);
