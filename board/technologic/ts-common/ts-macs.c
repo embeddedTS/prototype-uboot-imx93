@@ -37,9 +37,9 @@ void setup_mac_addresses(int n_macs)
 
 	eth_env_set_enetaddr("ethaddr", enetaddr);
 
-	for (i = 0; i < n_macs; i++) {
+	for (i = 1; i < n_macs; i++) {
 		increment_mac(enetaddr);
-		snprintf(mac_str, sizeof(mac_str), "eth%daddr", i + 1);
+		snprintf(mac_str, sizeof(mac_str), "eth%daddr", i);
 		eth_env_set_enetaddr(mac_str, enetaddr);
 	}
 }
