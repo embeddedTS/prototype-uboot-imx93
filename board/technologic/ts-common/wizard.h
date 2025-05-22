@@ -1,11 +1,7 @@
-// SPDX-License-Identifier: GPL-2.0+
-/*
- * Copyright 2024 Technologic Systems, Inc. (dba embeddedTS)
- */
+/* SPDX-License-Identifier: GPL-2.0+ */
+
 #ifndef __SUPER_H__
 #define __SUPER_H__
-
-#include <common.h>
 
 #define SUPER_I2C_ADDR 0x54
 
@@ -22,9 +18,9 @@
 #define SUPER_TEMPERATURE 160
 
 enum i2c_cmds_t {
-	I2C_NOCMD  = ((uint16_t)0 << 0),
-	I2C_REBOOT = ((uint16_t)1 << 0),
-	I2C_HALT   = ((uint16_t)1 << 1),
+	I2C_NOCMD  = ((u16)0 << 0),
+	I2C_REBOOT = ((u16)1 << 0),
+	I2C_HALT   = ((u16)1 << 1),
 };
 
 enum reboot_reasons_t {
@@ -39,11 +35,11 @@ enum reboot_reasons_t {
 	REBOOT_REASON_WAKE_FROM_USB_VBUS = 8,
 };
 
-int super_write(uint16_t addr, uint16_t value);
-int super_read(uint16_t addr, uint16_t *value);
+int super_write(u16 addr, u16 value);
+int super_read(u16 addr, u16 *value);
 int wizard_read_mac(uint8_t *mac_buffer);
-uint16_t wizard_byte_order(uint16_t addr_value);
+u16 wizard_byte_order(u16 addr_value);
 
-uint16_t get_board_model_register(void);
-uint16_t get_board_model_register_early(void);
+u16 get_board_model_register(void);
+u16 get_board_model_register_early(void);
 #endif // __SUPER_H__

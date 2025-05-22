@@ -6,7 +6,6 @@
  * on embeddedTS platforms. This device uses 16-bit address/data
  */
 
-#include <common.h>
 #include <dm/uclass.h>
 #include <i2c.h>
 
@@ -26,33 +25,32 @@
 static struct udevice *super_get_i2c_chip(void)
 {
 	static struct udevice *chip;
-	static bool found = 0;
+	static bool found;
 	struct udevice *bus;
-	uint16_t value;
+	u16 value;
 	int busses[2] = {3, 0};
 	int i;
 	int ret = 1;
 
-	if (found) {
+	if (found)
 		return chip;
-	}
 
-	for (i = 0; i < (sizeof(busses)/sizeof(int)); i++) {
+	for (i = 0; i < (sizeof(busses) / sizeof(int)); i++) {
 		ret = uclass_get_device_by_seq(UCLASS_I2C, busses[i], &bus);
 		if (ret)
 			continue;
+
 		ret = i2c_get_chip(bus, SUPER_I2C_ADDR, 2, &chip);
 		if (ret)
 			continue;
 
 		ret = i2c_set_chip_offset_len(chip, 2);
-		if (!ret) {
+		if (!ret)
 			break;
-		}
+
 		ret = dm_i2c_read(chip, 0, (uint8_t *)&value, sizeof(value));
-		if (!ret) {
+		if (!ret)
 			break;
-		}
 	}
 	if (ret)
 		return NULL;
@@ -60,7 +58,7 @@ static struct udevice *super_get_i2c_chip(void)
 	return chip;
 }
 
-int super_write(uint16_t addr, uint16_t value)
+int super_write(u16 addr, u16 value)
 {
 	struct udevice *chip;
 
@@ -71,7 +69,7 @@ int super_write(uint16_t addr, uint16_t value)
 	return dm_i2c_write(chip, cpu_to_be16(addr), (uint8_t *)&value, 2);
 }
 
-int super_read(uint16_t addr, uint16_t *value)
+int super_read(u16 addr, u16 *value)
 {
 	struct udevice *chip;
 	int ret;
@@ -93,11 +91,10 @@ int super_read(uint16_t addr, uint16_t *value)
 
 int wizard_read_mac(uint8_t *mac_buffer)
 {
-	int ret;
-	uint16_t reg_addr;
-	uint16_t word;
+	u16 reg_addr = SUPER_SERIAL;
 	int n_words = 3;
-	reg_addr = SUPER_SERIAL;
+	u16 word;
+	int ret;
 
 	while (n_words--) {
 		ret = super_read(reg_addr, &word);
@@ -106,25 +103,24 @@ int wizard_read_mac(uint8_t *mac_buffer)
 			       reg_addr, ret);
 			break;
 		}
-		mac_buffer[2*(2-n_words)] = word & 0xff;
-		mac_buffer[2*(2-n_words)+1] = (word >> 8) & 0xff;
+		mac_buffer[2 * (2 - n_words)] = word & 0xff;
+		mac_buffer[2 * (2 - n_words) + 1] = (word >> 8) & 0xff;
 		reg_addr += 1;
 	}
 
 	return ret;
 }
 
-uint16_t get_board_model_register(void)
+u16 get_board_model_register(void)
 {
-	static uint16_t board_model_register = 0;
-	static bool found = 0;
+	static u16 board_model_register;
+	static bool found;
 	int ret;
 
 	if (!found) {
 		ret = super_read(0, &board_model_register);
-		if (!ret) {
+		if (!ret)
 			found = 1;
-		}
 	}
 
 	return board_model_register;
@@ -132,9 +128,9 @@ uint16_t get_board_model_register(void)
 
 const char *get_board_model(void)
 {
-	static char str_buffer[5] = {0};
-	static bool loaded = 0;
-	uint16_t condensed_register_form;
+	static char str_buffer[5];
+	static bool loaded;
+	u16 condensed_register_form;
 
 	if (!loaded) {
 		condensed_register_form = get_board_model_register();
@@ -147,7 +143,7 @@ const char *get_board_model(void)
 const char *get_board_name(void)
 {
 	static char name_str[12] = {0};
-	static bool loaded = 0;
+	static bool loaded;
 
 	if (!loaded) {
 		snprintf(name_str, sizeof(name_str), "TS-%s", get_board_model());
@@ -160,53 +156,52 @@ static struct udevice *super_get_i2c_chip_early(void)
 {
 	struct udevice *chip;
 	struct udevice *bus;
-	uint16_t le_value;
+	u16 le_value;
 	int busses[2] = {3, 0};
 	int i;
 	int ret = 1;
 
-	for (i = 0; i < (sizeof(busses)/sizeof(int)); i++) {
+	for (i = 0; i < (sizeof(busses) / sizeof(int)); i++) {
 		ret = uclass_get_device_by_seq(UCLASS_I2C, busses[i], &bus);
-		if (ret) {
+		if (ret)
 			continue;
-		}
+
 		ret = i2c_get_chip(bus, SUPER_I2C_ADDR, 2, &chip);
-		if (ret) {
+		if (ret)
 			continue;
-		}
-		ret = dm_i2c_read(chip,  cpu_to_be16(0),
-						  (uint8_t *)&le_value,
-						  sizeof(le_value));
-		if (!ret) {
+
+		ret = dm_i2c_read(chip, cpu_to_be16(0),
+				  (uint8_t *)&le_value,
+				  sizeof(le_value));
+		if (!ret)
 			break;
-		}
 	}
-	if (ret) {
+	if (ret)
 		return NULL;
-	}
+
 	return chip;
 }
 
-int super_read_early(uint16_t addr, uint16_t *value)
+int super_read_early(u16 addr, u16 *value)
 {
 	struct udevice *chip;
 	int ret;
 
 	chip = super_get_i2c_chip_early();
-	if (!chip) {
+	if (!chip)
 		return -ENODEV;
-	}
 
-	ret = dm_i2c_read(chip, cpu_to_be16(addr), value, 2);
-	if (ret) {
+	ret = dm_i2c_read(chip, cpu_to_be16(addr), (uint8_t *)value, 2);
+	if (ret)
 		return ret;
-	}
+
 	return 0;
 }
 
-uint16_t get_board_model_register_early(void)
+u16 get_board_model_register_early(void)
 {
-	uint16_t board_model_register = 0;
+	u16 board_model_register = 0;
+
 	super_read_early(0, &board_model_register);
 	return board_model_register;
 }

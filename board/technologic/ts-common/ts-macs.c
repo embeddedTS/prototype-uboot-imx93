@@ -3,11 +3,11 @@
  * Copyright 2024 Technologic Systems, Inc. (dba embeddedTS)
  */
 
-#include <common.h>
 #include <env.h>
 #include <net.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <vsprintf.h>
 
 #include "ts-macs.h"
 #include "wizard.h"
@@ -51,18 +51,16 @@ void setup_mac_addresses(void)
 		}
 	}
 
-	if (from_wizard) {
+	if (from_wizard)
 		eth_env_set_enetaddr("ethaddr", enetaddr);
-	} else if (!from_env) {
+	else if (!from_env)
 		return;
-	}
 
 	for (i = 1; i < N_MAC_ADDRS; i++) {
 		increment_mac(enetaddr);
 		snprintf(mac_str, sizeof(mac_str), "eth%daddr", i);
 		eth_env_set_enetaddr(mac_str, enetaddr);
 	}
-	return;
 }
 
 static void increment_mac(uint8_t *mac)

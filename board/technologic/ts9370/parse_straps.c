@@ -1,7 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright (C) 2019-2025 Technologic Systems dba embeddedTS
- *
- * SPDX-License-Identifier:     GPL-2.0+
  */
 
 #include <vsprintf.h>
@@ -26,29 +25,27 @@
 #define	SPI_CSn		IMX_GPIO_NR(1, 18)	/* R129 / Bit 1 */
 #define	SPI_MOSILK	IMX_GPIO_NR(1, 20)	/* R130 / Bit 0 */
 
-#define GPIO_01	IMX_GPIO_NR(1, 1)
-#define GPIO_02	IMX_GPIO_NR(1, 2)
-#define GPIO_03	IMX_GPIO_NR(1, 3)
-#define GPIO_05	IMX_GPIO_NR(1, 5)
-#define GPIO_06	IMX_GPIO_NR(1, 6)
-#define GPIO_07	IMX_GPIO_NR(1, 7)
-#define GPIO_09	IMX_GPIO_NR(1, 9)
-#define GPIO_11	IMX_GPIO_NR(1, 11)
-#define GPIO_13	IMX_GPIO_NR(1, 13)
-#define GPIO_15	IMX_GPIO_NR(1, 15)
-#define GPIO_16	IMX_GPIO_NR(1, 16)
-#define GPIO_17	IMX_GPIO_NR(1, 17)
-#define GPIO_19	IMX_GPIO_NR(1, 19)
-#define GPIO_21	IMX_GPIO_NR(1, 21)
+#define GPIO_01		IMX_GPIO_NR(1, 1)
+#define GPIO_02		IMX_GPIO_NR(1, 2)
+#define GPIO_03		IMX_GPIO_NR(1, 3)
+#define GPIO_05		IMX_GPIO_NR(1, 5)
+#define GPIO_06		IMX_GPIO_NR(1, 6)
+#define GPIO_07		IMX_GPIO_NR(1, 7)
+#define GPIO_09		IMX_GPIO_NR(1, 9)
+#define GPIO_11		IMX_GPIO_NR(1, 11)
+#define GPIO_13		IMX_GPIO_NR(1, 13)
+#define GPIO_15		IMX_GPIO_NR(1, 15)
+#define GPIO_16		IMX_GPIO_NR(1, 16)
+#define GPIO_17		IMX_GPIO_NR(1, 17)
+#define GPIO_19		IMX_GPIO_NR(1, 19)
+#define GPIO_21		IMX_GPIO_NR(1, 21)
 
-static void preserve_straps(uint16_t straps);
-#ifndef CONFIG_SPL_BUILD
-static uint16_t read_straps_preserved_by_spl(void);
-#endif
+static void preserve_straps(u16 straps);
+static u16 read_straps_preserved_by_spl(void);
 
-#define STRAP_PAD_PD_CTRL ( PAD_CTL_PDE )
+#define STRAP_PAD_PD_CTRL (PAD_CTL_PDE)
 
-static iomux_v3_cfg_t const strap_pads[] = {
+static const iomux_v3_cfg_t strap_pads[] = {
 	MX93_PAD_GPIO_IO00__GPIO2_IO00 | MUX_PAD_CTRL(STRAP_PAD_PD_CTRL),
 	MX93_PAD_GPIO_IO04__GPIO2_IO04 | MUX_PAD_CTRL(STRAP_PAD_PD_CTRL),
 	MX93_PAD_GPIO_IO08__GPIO2_IO08 | MUX_PAD_CTRL(STRAP_PAD_PD_CTRL),
@@ -75,15 +72,15 @@ static iomux_v3_cfg_t const strap_pads[] = {
 
 const char get_board_version_char(void)
 {
-	uint16_t raw_cpu_straps = 0;
+	u16 raw_cpu_straps = 0;
 
 	raw_cpu_straps =  read_raw_cpu_straps();
 	return '1';
 }
 
-uint32_t get_straps(void)
+u32 get_straps(void)
 {
-	uint16_t raw_cpu_straps = 0;
+	u16 raw_cpu_straps = 0;
 
 	raw_cpu_straps =  read_raw_cpu_straps();
 	return raw_cpu_straps;
@@ -97,17 +94,17 @@ const char *get_board_version_str(void)
 	return model_str;
 }
 
-uint8_t read_board_opts(void)
+u8 read_board_opts(void)
 {
-	uint8_t cpu_opts;
+	u8 cpu_opts;
 
 	cpu_opts = read_raw_cpu_straps();
 	return cpu_opts;
 }
 
-static uint16_t gpio_bits_to_straps(void)
+static u16 gpio_bits_to_straps(void)
 {
-	uint16_t cpu_straps = 0;
+	u16 cpu_straps = 0;
 
 	cpu_straps |= (gpio_get_value(UART6_TXD) << 7);		// GPIO_4
 	cpu_straps |= (gpio_get_value(UART7_HS) << 6);		// GPIO_10
@@ -120,10 +117,10 @@ static uint16_t gpio_bits_to_straps(void)
 	return cpu_straps;
 }
 
-uint16_t read_raw_cpu_straps(void)
+u16 read_raw_cpu_straps(void)
 {
-	static uint16_t cpu_straps = 0;
-	static bool read = 0;
+	static u16 cpu_straps;
+	static bool read;
 
 	if (!read) {
 		imx_iomux_v3_setup_multiple_pads(strap_pads, ARRAY_SIZE(strap_pads));
@@ -154,7 +151,6 @@ uint16_t read_raw_cpu_straps(void)
 		 */
 		preserve_straps(cpu_straps);
 
-#ifndef CONFIG_SPL_BUILD
 		/*
 		 * There is no guarantee that U-Boot can read the
 		 * straps accurately at this point. Thus SPL saves
@@ -165,29 +161,31 @@ uint16_t read_raw_cpu_straps(void)
 		 * point. When the FPGA is available in U-Boot, we
 		 * will pass the strapping in register memory there.
 		 */
-		cpu_straps = read_straps_preserved_by_spl();
-#endif
+		if (!IS_ENABLED(CONFIG_SPL_BUILD))
+			cpu_straps = read_straps_preserved_by_spl();
+
 		read = 1;
 	}
 	return cpu_straps;
 }
 
-#ifndef CONFIG_SPL_BUILD
-static uint16_t read_straps_preserved_by_spl(void)
+static u16 read_straps_preserved_by_spl(void)
 {
-	ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
-	uint32_t tmp_save_intermediate = 0;
+	struct ocram_debug_t *const ocram_debug_area_p =
+		(struct ocram_debug_t * const)OCRAM_DEBUG_AREA_ADDR;
+	u32 tmp_save_intermediate = 0;
+
 	tmp_save_intermediate = ocram_debug_area_p->spl_saved_straps;
 	return tmp_save_intermediate;
 }
-#endif
 
-static void preserve_straps(uint16_t straps)
+static void preserve_straps(u16 straps)
 {
-	ocram_debug_t *const ocram_debug_area_p = (ocram_debug_t * const) OCRAM_DEBUG_AREA_ADDR;
-#ifdef CONFIG_SPL_BUILD
-	ocram_debug_area_p->spl_saved_straps |= straps;
-#else
-	ocram_debug_area_p->saved_straps |= straps;
-#endif
+	struct ocram_debug_t *const ocram_debug_area_p =
+		(struct ocram_debug_t * const)OCRAM_DEBUG_AREA_ADDR;
+
+	if (IS_ENABLED(CONFIG_SPL_BUILD))
+		ocram_debug_area_p->spl_saved_straps |= straps;
+	else
+		ocram_debug_area_p->saved_straps |= straps;
 }

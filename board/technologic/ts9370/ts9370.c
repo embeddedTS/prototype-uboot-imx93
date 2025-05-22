@@ -4,7 +4,6 @@
  * Copyright 2023-2024 Technologic Systems, Inc. (dba embeddedTS)
  */
 
-#include <common.h>
 #include <env.h>
 #include <efi_loader.h>
 #include <init.h>
@@ -36,27 +35,23 @@ DECLARE_GLOBAL_DATA_PTR;
 #define UART_PAD_CTRL	(PAD_CTL_DSE(6) | PAD_CTL_FSEL2)
 #define FPGA_PAD_CTRL	(PAD_CTL_DSE(6) | PAD_CTL_ODE | PAD_CTL_PUE)
 
-static iomux_v3_cfg_t const uart_pads[] = {
+static const iomux_v3_cfg_t uart_pads[] = {
 	MX93_PAD_UART1_RXD__LPUART1_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
 	MX93_PAD_UART1_TXD__LPUART1_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
 };
 
-#if CONFIG_IS_ENABLED(DWC_ETH_QOS)
 static int setup_eqos(void);
-static iomux_v3_cfg_t const fpga_pads[] = {
+static const iomux_v3_cfg_t fpga_pads[] = {
 	MX93_PAD_GPIO_IO02__GPIO2_IO02 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // DEV_CLRN / GPIO_02
 	MX93_PAD_GPIO_IO11__GPIO2_IO11 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // NSTATUS / GPIO_11
 	MX93_PAD_GPIO_IO10__GPIO2_IO10 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // CONF_DONE / GPIO_10
 };
-#endif
 
-#if CONFIG_IS_ENABLED(FEC_MXC)
 static int setup_fec(void);
-static iomux_v3_cfg_t const fec_enet_pads[] = {
+static const iomux_v3_cfg_t fec_enet_pads[] = {
 	MX93_PAD_SD3_DATA3__GPIO3_IO25 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // ETH2_RESET#
 	MX93_PAD_SD3_DATA2__GPIO3_IO24 | MUX_PAD_CTRL(FPGA_PAD_CTRL), // ETH1_RESET#
 };
-#endif
 
 #if CONFIG_IS_ENABLED(EFI_HAVE_CAPSULE_SUPPORT)
 #define IMX_BOOT_IMAGE_GUID \
@@ -66,7 +61,7 @@ static iomux_v3_cfg_t const fec_enet_pads[] = {
 struct efi_fw_image fw_images[] = {
 	{
 		.image_type_id = IMX_BOOT_IMAGE_GUID,
-		.fw_name = u"IMX93-11X11-EVK-RAW",
+		.fw_name = u"IMX93-TS-9370",
 		.image_index = 1,
 	},
 };
@@ -93,7 +88,7 @@ int board_early_init_f(void)
 
 int board_fit_config_name_match(const char *name)
 {
-	uint16_t board_model_register = 0;
+	u16 board_model_register = 0;
 
 	board_model_register = get_board_model_register_early();
 
@@ -122,14 +117,12 @@ int board_fit_config_name_match(const char *name)
 	return -EINVAL;
 }
 
-#if CONFIG_IS_ENABLED(FEC_MXC)
 static int setup_fec(void)
 {
 	imx_iomux_v3_setup_multiple_pads(fec_enet_pads, ARRAY_SIZE(fec_enet_pads));
 
 	return set_clk_enet(ENET_125MHZ);
 }
-#endif
 
 int board_phy_config(struct phy_device *phydev)
 {
@@ -139,63 +132,49 @@ int board_phy_config(struct phy_device *phydev)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(DWC_ETH_QOS)
 static int setup_eqos(void)
 {
 	struct blk_ctrl_wakeupmix_regs *bctrl =
 		(struct blk_ctrl_wakeupmix_regs *)BLK_CTRL_WAKEUPMIX_BASE_ADDR;
 
 	imx_iomux_v3_setup_multiple_pads(fpga_pads, ARRAY_SIZE(fpga_pads));
-
-	if (!IS_ENABLED(CONFIG_TARGET_IMX93_14X14_EVK)) {
-		/* set INTF as RGMII, enable RGMII TXC clock */
-		clrsetbits_le32(&bctrl->eqos_gpr,
-				BCTRL_GPR_ENET_QOS_INTF_MODE_MASK,
-				BCTRL_GPR_ENET_QOS_INTF_SEL_RGMII | BCTRL_GPR_ENET_QOS_CLK_GEN_EN);
-
-		return set_clk_eqos(ENET_125MHZ);
-	}
+	/* set INTF as RGMII, enable RGMII TXC clock */
+	clrsetbits_le32(&bctrl->eqos_gpr,
+			BCTRL_GPR_ENET_QOS_INTF_MODE_MASK,
+			BCTRL_GPR_ENET_QOS_INTF_SEL_RGMII | BCTRL_GPR_ENET_QOS_CLK_GEN_EN);
 
 	return 0;
 }
-#endif
 
 int board_init(void)
 {
-#if CONFIG_IS_ENABLED(DTB_RESELECT)
-	int rescan;
-	int ret;
-#  if !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO_LATE) && !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO)
-	const char *model;
-#  endif
+	if (CONFIG_IS_ENABLED(DTB_RESELECT)) {
+		int rescan;
+		int ret;
+		const char *model;
 
-	ret = fdtdec_resetup(&rescan);
-	if (!ret && rescan) {
-		dm_uninit();
-		dm_init_and_scan(false);
+		ret = fdtdec_resetup(&rescan);
+		if (!ret && rescan) {
+			dm_uninit();
+			dm_init_and_scan(false);
+		}
+		model = fdt_getprop(gd->fdt_blob, 0, "model", NULL);
+		if (model)
+			printf("Model: %s\n", model);
 	}
-#  if !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO_LATE) && !IS_ENABLED(CONFIG_DISPLAY_BOARDINFO)
-	model = fdt_getprop(gd->fdt_blob, 0, "model", NULL);
-	if (model) {
-		printf("Model: %s\n", model);
-	}
-#  endif
-#endif
 
-#if CONFIG_IS_ENABLED(FEC_MXC)
-	setup_fec();
-#endif
+	if (CONFIG_IS_ENABLED(FEC_MXC))
+		setup_fec();
 
-#if CONFIG_IS_ENABLED(DWC_ETH_QOS)
-	setup_eqos();
-#endif
+	if (CONFIG_IS_ENABLED(DWC_ETH_QOS))
+		setup_eqos();
 
 	return 0;
 }
 
 static void findfdt(void)
 {
-	uint16_t model = get_board_model_register();
+	u16 model = get_board_model_register();
 	const char *fdtfile = NULL;
 
 	switch (model) {
@@ -219,13 +198,12 @@ static void findfdt(void)
 int board_late_init(void)
 {
 	char rev_as_str[2] = {0};
-	uint32_t cpu_straps;
-	uint32_t board_straps;
-	uint16_t model;
+	u32 cpu_straps;
+	u32 board_straps;
+	u16 model;
 
 	model = get_board_model_register();
 
-	setup_mac_addresses();
 #ifdef CONFIG_ENV_IS_IN_MMC
 	board_late_mmc_env_init();
 #endif
@@ -277,6 +255,8 @@ int board_late_init(void)
 		mdelay(1);
 		writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
 	}
+
+	setup_mac_addresses();
 
 	/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
 	writel(1 << 2, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));

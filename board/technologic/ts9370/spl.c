@@ -3,7 +3,6 @@
  * Copyright 2022 NXP
  */
 
-#include <common.h>
 #include <command.h>
 #include <cpu_func.h>
 #include <hang.h>
@@ -42,9 +41,9 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int spl_board_boot_device(enum boot_device boot_dev_spl)
 {
-#ifdef CONFIG_SPL_BOOTROM_SUPPORT
-	return BOOT_DEVICE_BOOTROM;
-#else
+	if (IS_ENABLED(CONFIG_SPL_BOOTROM_SUPPORT))
+		return BOOT_DEVICE_BOOTROM;
+
 	switch (boot_dev_spl) {
 	case SD1_BOOT:
 	case MMC1_BOOT:
@@ -55,7 +54,6 @@ int spl_board_boot_device(enum boot_device boot_dev_spl)
 	default:
 		return BOOT_DEVICE_NONE;
 	}
-#endif
 }
 
 void spl_board_init(void)
@@ -73,8 +71,8 @@ extern struct dram_timing_info dram_timing_8gb_3733;
 void spl_dram_init(void)
 {
 	struct dram_timing_info *ptiming;
-	uint16_t resistor_straps = read_raw_cpu_straps();
-	uint16_t model = get_board_model_register();
+	u16 resistor_straps = read_raw_cpu_straps();
+	u16 model = get_board_model_register();
 
 	/*
 	 * DRAM size can is read from the strapping resistors.
@@ -91,7 +89,8 @@ void spl_dram_init(void)
 
 	if (model == 0x4300) {
 		ptiming = &dram_timing_half_16gb_3733;
-		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n", resistor_straps);
+		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n",
+		       resistor_straps);
 	} else {
 		/* TS-9370 / TS-9390 prototypes */
 		if (resistor_straps & (1 << 1)) {
@@ -99,11 +98,12 @@ void spl_dram_init(void)
 			ptiming = &dram_timing_8gb_3733;
 		} else if ((resistor_straps & (1 << 2)) == 0) {
 			/*
-			* In the future, this will be 2GB (dual-rank 16gb) as
-			* long as we know this board has ZQ1 connected for
-			* the second rank.
-			*/
-			printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n", resistor_straps);
+			 * In the future, this will be 2GB (dual-rank 16gb) as
+			 * long as we know this board has ZQ1 connected for
+			 * the second rank.
+			 */
+			printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n",
+			       resistor_straps);
 			ptiming = &dram_timing_half_16gb_3733;
 		} else {
 			printf("DDR: 2 GB, resistor_straps=%04x\n", resistor_straps);
@@ -115,7 +115,6 @@ void spl_dram_init(void)
 	ddr_init(ptiming);
 }
 
-#if CONFIG_IS_ENABLED(DM_PMIC_PCA9450)	
 int power_init_board(void)
 {
 	struct udevice *dev;
@@ -139,8 +138,7 @@ int power_init_board(void)
 	ret = pmic_reg_read(dev, PCA9450_PWR_CTRL);
 	if (ret < 0)
 		return ret;
-	else
-		val = ret;
+	val = ret;
 
 	if (is_voltage_mode(VOLT_LOW_DRIVE)) {
 		buck_val = 0x0c; /* 0.8v for Low drive mode */
@@ -176,7 +174,6 @@ int power_init_board(void)
 	pmic_reg_write(dev, 0xa, 0x3);
 	return 0;
 }
-#endif
 
 void board_init_f(ulong dummy)
 {
@@ -228,7 +225,8 @@ void board_init_f(ulong dummy)
 }
 
 #ifdef CONFIG_ANDROID_SUPPORT
-int board_get_emmc_id(void) {
+int board_get_emmc_id(void)
+{
 	return 0;
 }
 #endif

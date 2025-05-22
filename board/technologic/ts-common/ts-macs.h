@@ -1,7 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0+
-/*
- * Copyright 2024 Technologic Systems, Inc. (dba embeddedTS)
- */
+/* SPDX-License-Identifier: GPL-2.0+ */
 
 // FIXME: This will need to become a CONFIG parameter soon enough !-)
 #define N_MAC_ADDRS 2

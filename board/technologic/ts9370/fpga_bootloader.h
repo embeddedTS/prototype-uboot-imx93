@@ -1,7 +1,10 @@
-#pragma once
+/* SPDX-License-Identifier: GPL-2.0+ */
+#ifndef __FPGA_BOOTLOADER_H__
+#define __FPGA_BOOTLOADER_H__
 
-/* These updater regs are only availble while in the bootloader before we have booted 
- * to the application load */
+/* These updater regs are only available while in the bootloader before we have booted
+ * to the application load
+ */
 #define UPDATER_BASE				(FPGA_BASE + 0x100)
 
 /* Status Register (0x0) */
@@ -63,14 +66,16 @@
 #define CFM_SIZE		0x23000
 #define WORD_ADDRESS(val)	((val) >> 2)
 
-uint32_t swap_bitstream_order(uint32_t x);
-int flash_wait_until_idle(uint32_t timeout_ms, uint32_t *reg);
-int flash_write(uint32_t flash_addr, uint32_t data_addr, uint32_t len);
-int flash_read(uint32_t flash_addr, uint32_t data_addr, uint32_t len);
+u32 swap_bitstream_order(u32 x);
+int flash_wait_until_idle(u32 timeout_ms, u32 *reg);
+int flash_write(u32 flash_addr, u32 data_addr, u32 len);
+int flash_read(u32 flash_addr, u32 data_addr, u32 len);
 int flash_sector_erase(uint8_t sector);
-int flash_update_app(uint32_t addr, uint32_t len);
-int flash_read_app(uint32_t addr, uint32_t len);
-int flash_update_bootloader(uint32_t addr, uint32_t len);
-int flash_read_bootloader(uint32_t addr, uint32_t len);
+int flash_update_app(u32 addr, u32 len);
+int flash_read_app(u32 addr, u32 len);
+int flash_update_bootloader(u32 addr, u32 len);
+int flash_read_bootloader(u32 addr, u32 len);
 int fpga_update_from_flash(void);
 int fpga_reconfig(void);
+
+#endif

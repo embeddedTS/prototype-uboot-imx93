@@ -2,7 +2,6 @@
 /*
  * Copyright 2024 Technologic Systems, Inc. (dba embeddedTS)
  */
-#include <common.h>
 #include <console.h>
 #include <command.h>
 #include <asm/io.h>
@@ -166,12 +165,12 @@ int fpga_update_from_flash(void)
 	if (res) {
 		printf("Failed to erase FIT image region\n");
 		return 1;
-	}	
+	}
 
 	return 0;
 }
 
-uint32_t swap_bitstream_order(uint32_t x)
+u32 swap_bitstream_order(u32 x)
 {
 	/* Reverse all bits to match order on raw flash */
 	x = (x >> 16) | (x << 16);
@@ -182,7 +181,7 @@ uint32_t swap_bitstream_order(uint32_t x)
 	return x;
 }
 
-int flash_wait_until_idle(uint32_t timeout_ms, uint32_t *reg)
+int flash_wait_until_idle(u32 timeout_ms, u32 *reg)
 {
 	int timeout = 1;
 
@@ -203,10 +202,10 @@ int flash_wait_until_idle(uint32_t timeout_ms, uint32_t *reg)
 	return 0;
 }
 
-int flash_write(uint32_t flash_addr, uint32_t data_addr, uint32_t len)
+int flash_write(u32 flash_addr, u32 data_addr, u32 len)
 {
-	uint32_t data;
-	uint32_t reg;
+	u32 data;
+	u32 reg;
 	int ret;
 
 	if (!fpga_is_bootloader()) {
@@ -214,10 +213,11 @@ int flash_write(uint32_t flash_addr, uint32_t data_addr, uint32_t len)
 		return 1;
 	}
 
-	printf("Writing Flash Addr 0x%08X from memory 0x%08X, len %d bytes\n", flash_addr, data_addr, len);
+	printf("Writing Flash Addr 0x%08X from memory 0x%08X, len %d bytes\n",
+	       flash_addr, data_addr, len);
 
-	for (uint32_t i = 0; i < len; i += 4) {
-		data = *(volatile uint32_t *)(uintptr_t)(data_addr + i);
+	for (u32 i = 0; i < len; i += 4) {
+		data = *(u32 *)(uintptr_t)(data_addr + i);
 		data = swap_bitstream_order(data);
 		writel(WORD_ADDRESS(flash_addr + i), UPDATER_ADDR);
 		writel(data, UPDATER_FLASHDATA);
@@ -237,10 +237,10 @@ int flash_write(uint32_t flash_addr, uint32_t data_addr, uint32_t len)
 	return 0;
 }
 
-int flash_read(uint32_t flash_addr, uint32_t data_addr, uint32_t len)
+int flash_read(u32 flash_addr, u32 data_addr, u32 len)
 {
-	uint32_t data;
-	uint32_t reg;
+	u32 data;
+	u32 reg;
 	int ret;
 
 	if (!fpga_is_bootloader()) {
@@ -248,9 +248,10 @@ int flash_read(uint32_t flash_addr, uint32_t data_addr, uint32_t len)
 		return 1;
 	}
 
-	printf("Reading Flash Addr 0x%08X to memory 0x%08X, len %d bytes\n", flash_addr, data_addr, len);
+	printf("Reading Flash Addr 0x%08X to memory 0x%08X, len %d bytes\n",
+	       flash_addr, data_addr, len);
 
-	for (uint32_t i = 0; i < len; i += 4) {
+	for (u32 i = 0; i < len; i += 4) {
 		writel(WORD_ADDRESS(flash_addr + i), UPDATER_ADDR);
 		writel(UPDATER_CTRL_START_READ, UPDATER_CTRL);
 		/* MAX 10 Documentation does not list max read time. */
@@ -263,7 +264,7 @@ int flash_read(uint32_t flash_addr, uint32_t data_addr, uint32_t len)
 		/* Read the data from UPDATER_FLASHDATA and store it in system RAM */
 		data = readl(UPDATER_FLASHDATA);
 		data = swap_bitstream_order(data);
-		*(volatile uint32_t *)(uintptr_t)(data_addr + i) = data;
+		*(u32 *)(uintptr_t)(data_addr + i) = data;
 
 		if (ctrlc()) {
 			printf("Killed\n");
@@ -276,7 +277,7 @@ int flash_read(uint32_t flash_addr, uint32_t data_addr, uint32_t len)
 
 int flash_sector_erase(uint8_t sector)
 {
-	uint32_t reg;
+	u32 reg;
 	int ret;
 
 	if (sector > 5)
@@ -290,11 +291,11 @@ int flash_sector_erase(uint8_t sector)
 		printf("Flash Erase failed at sector %d\n", sector);
 		return 1;
 	}
-	
+
 	return  0;
 }
 
-int flash_update_app(uint32_t addr, uint32_t len)
+int flash_update_app(u32 addr, u32 len)
 {
 	int ret;
 
@@ -317,7 +318,7 @@ flash_fail:
 	return ret;
 }
 
-int flash_read_app(uint32_t addr, uint32_t len)
+int flash_read_app(u32 addr, u32 len)
 {
 	if (!fpga_is_bootloader()) {
 		printf("FPGA is already booted\n");
@@ -327,7 +328,7 @@ int flash_read_app(uint32_t addr, uint32_t len)
 	return flash_read(CFM1_BASE, addr, len);
 }
 
-int flash_update_bootloader(uint32_t addr, uint32_t len)
+int flash_update_bootloader(u32 addr, u32 len)
 {
 	int ret;
 
@@ -343,7 +344,7 @@ int flash_update_bootloader(uint32_t addr, uint32_t len)
 	return flash_write(CFM0_BASE, addr, len);
 }
 
-int flash_read_bootloader(uint32_t addr, uint32_t len)
+int flash_read_bootloader(u32 addr, u32 len)
 {
 	return flash_read(CFM0_BASE, addr, len);
 }
@@ -372,87 +373,87 @@ int fpga_reconfig(void)
 #define NUM_TEST_ITERATIONS 500000
 static int fpga_scratch_test(void)
 {
-    int ret = 0;
-    volatile uint32_t *scratch0_addr = (volatile uint32_t *)FPGA_SCRATCH0;
-    volatile uint32_t *scratch1_addr = (volatile uint32_t *)FPGA_SCRATCH1;
-    uint32_t read_value;
-    uint32_t random_value;
-    int total_tests = 0;
-    int failed_tests = 0;
+	int ret = 0;
+	u32 *scratch0_addr = (u32 *)FPGA_SCRATCH0;
+	u32 *scratch1_addr = (u32 *)FPGA_SCRATCH1;
+	u32 read_value;
+	u32 random_value;
+	int total_tests = 0;
+	int failed_tests = 0;
+	// Test predefined values on both scratch registers
+	u32 test_values[] = {0x00000000, 0xFFFFFFFF, 0x55555555, 0xAAAAAAAA};
 
-    // Test predefined values on both scratch registers
-    uint32_t test_values[] = {0x00000000, 0xFFFFFFFF, 0x55555555, 0xAAAAAAAA};
-    for (int i = 0; i < sizeof(test_values) / sizeof(test_values[0]); i++) {
-        // Test FPGA_SCRATCH0
-        writel(test_values[i], scratch0_addr);
-        read_value = readl(scratch0_addr);
-        total_tests++;
-        if (read_value != test_values[i]) {
-			if (failed_tests < 10) {
-				printf("Error: FPGA_SCRATCH0 wrote 0x%08X but read back 0x%08X\n", test_values[i], read_value);
-			}
-            failed_tests++;
-            ret = -1;
-        }
+	for (int i = 0; i < sizeof(test_values) / sizeof(test_values[0]); i++) {
+		// Test FPGA_SCRATCH0
+		writel(test_values[i], scratch0_addr);
+		read_value = readl(scratch0_addr);
+		total_tests++;
+		if (read_value != test_values[i]) {
+			if (failed_tests < 10)
+				printf("Error: FPGA_SCRATCH0 wrote 0x%08X but read back 0x%08X\n",
+				       test_values[i], read_value);
+			failed_tests++;
+			ret = -1;
+		}
 
-        // Test FPGA_SCRATCH1
-        writel(test_values[i], scratch1_addr);
-        read_value = readl(scratch1_addr);
-        total_tests++;
-        if (read_value != test_values[i]) {
-			if (failed_tests < 10) {
-				printf("Error: FPGA_SCRATCH1 wrote 0x%08X but read back 0x%08X\n", test_values[i], read_value);
-			}
-            failed_tests++;
-            ret = -1;
-        }
-    }
+		// Test FPGA_SCRATCH1
+		writel(test_values[i], scratch1_addr);
+		read_value = readl(scratch1_addr);
+		total_tests++;
+		if (read_value != test_values[i]) {
+			if (failed_tests < 10)
+				printf("Error: FPGA_SCRATCH1 wrote 0x%08X but read back 0x%08X\n",
+				       test_values[i], read_value);
+			failed_tests++;
+			ret = -1;
+		}
+	}
 
-    // Randomized stress test on both scratch registers
-    for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
-        random_value = rand();
+	// Randomized stress test on both scratch registers
+	for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
+		random_value = rand();
 
-        // Write and verify FPGA_SCRATCH0
-        writel(random_value, scratch0_addr);
-        read_value = readl(scratch0_addr);
-        total_tests++;
-        if (read_value != random_value) {
-			if (failed_tests < 10) {
-            	printf("Error: FPGA_SCRATCH0 wrote 0x%08X but read back 0x%08X\n", random_value, read_value);
-			}
-            failed_tests++;
-            ret = -1;
-        }
+		// Write and verify FPGA_SCRATCH0
+		writel(random_value, scratch0_addr);
+		read_value = readl(scratch0_addr);
+		total_tests++;
+		if (read_value != random_value) {
+			if (failed_tests < 10)
+				printf("Error: FPGA_SCRATCH0 wrote 0x%08X but read back 0x%08X\n",
+				       random_value, read_value);
+			failed_tests++;
+			ret = -1;
+		}
 
-        // Write and verify FPGA_SCRATCH1
-        writel(random_value, scratch1_addr);
-        read_value = readl(scratch1_addr);
-        total_tests++;
-        if (read_value != random_value) {
-			if (failed_tests < 10) {
-            	printf("Error: FPGA_SCRATCH1 wrote 0x%08X but read back 0x%08X\n", random_value, read_value);
-			}
-            failed_tests++;
-            ret = -1;
-        }
-    }
+		// Write and verify FPGA_SCRATCH1
+		writel(random_value, scratch1_addr);
+		read_value = readl(scratch1_addr);
+		total_tests++;
+		if (read_value != random_value) {
+			if (failed_tests < 10)
+				printf("Error: FPGA_SCRATCH1 wrote 0x%08X but read back 0x%08X\n",
+				       random_value, read_value);
+			failed_tests++;
+			ret = -1;
+		}
+	}
 
-    int passed_tests = total_tests - failed_tests;
-    int pass_percentage = (passed_tests * 100) / total_tests;
-    int fail_percentage = (failed_tests * 100) / total_tests;
+	int passed_tests = total_tests - failed_tests;
+	int pass_percentage = (passed_tests * 100) / total_tests;
+	int fail_percentage = (failed_tests * 100) / total_tests;
 
-    printf("Scratch register test completed.\n");
-    printf("Total tests: %d, Passed: %d (%d%%), Failed: %d (%d%%)\n",
-           total_tests, passed_tests, pass_percentage, failed_tests, fail_percentage);
+	printf("Scratch register test completed.\n");
+	printf("Total tests: %d, Passed: %d (%d%%), Failed: %d (%d%%)\n",
+	       total_tests, passed_tests, pass_percentage, failed_tests, fail_percentage);
 
-    return ret;
+	return ret;
 }
 
 static int do_fpgaboot(struct cmd_tbl *cmdtp, int flag, int argc,
-			      char *const argv[])
+		       char *const argv[])
 {
-	uint32_t addr;
-	uint32_t len;
+	u32 addr;
+	u32 len;
 	int ret = 0;
 
 	if (argc == 2) {
@@ -474,17 +475,16 @@ static int do_fpgaboot(struct cmd_tbl *cmdtp, int flag, int argc,
 		addr = simple_strtoul(argv[2], NULL, 16);
 		len = simple_strtoul(argv[3], NULL, 16);
 
-		if (strcmp(argv[1], "write") == 0) {
+		if (strcmp(argv[1], "write") == 0)
 			ret = flash_update_app(addr, len);
-		} else if (strcmp(argv[1], "read") == 0) {
+		else if (strcmp(argv[1], "read") == 0)
 			ret = flash_read_app(addr, len);
-		} else if (strcmp(argv[1], "unsafe_update_bootloader") == 0) {
+		else if (strcmp(argv[1], "unsafe_update_bootloader") == 0)
 			ret = flash_update_bootloader(addr, len);
-		} else if (strcmp(argv[1], "read_bootloader") == 0) {
+		else if (strcmp(argv[1], "read_bootloader") == 0)
 			ret = flash_read_bootloader(addr, len);
-		} else {
+		else
 			ret = CMD_RET_USAGE;
-		}
 	} else {
 		ret = CMD_RET_USAGE;
 	}
