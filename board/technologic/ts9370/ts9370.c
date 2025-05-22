@@ -205,6 +205,16 @@ int board_late_init(void)
 
 	model = get_board_model_register();
 
+	if (model == 0x4300)
+		/* The TS-4300 has 2 onboard ethernets, and is allocated a spare for
+		 * any carrier board Ethernets
+		 */
+		n_macs = 3;
+	else
+		/* SBCs have two onboard ethernets. */
+		n_macs = 2;
+	setup_mac_addresses(n_macs);
+
 #ifdef CONFIG_ENV_IS_IN_MMC
 	board_late_mmc_env_init();
 #endif
@@ -247,9 +257,6 @@ int board_late_init(void)
 		/* Turn on power to USB ports */
 		writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
 		writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
-
-		/* These two platforms have 2 ethernets */
-		n_macs = 2;
 	} else if (model == 0x4300) {
 		/* Drive EN_USB_HOST_5V high */
 		writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
@@ -258,13 +265,7 @@ int board_late_init(void)
 		writel(1 << 6, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
 		mdelay(1);
 		writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
-
-		/* The SOMs reserve a spare MAC address for the carrier board having an
-		 * onboard Ethernet */
-		n_macs = 3;
 	}
-
-	setup_mac_addresses(n_macs);
 
 	/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
 	writel(1 << 2, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
