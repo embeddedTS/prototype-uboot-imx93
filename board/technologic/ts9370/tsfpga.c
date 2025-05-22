@@ -14,7 +14,6 @@ void print_fpga_version(void)
 {
 	u32 model = readl((void *)FPGA_MODEL);
 	u32 tag_version = readl((void *)FPGA_TAG_VERSION);
-	u32 git_hash = readl((void *)FPGA_HASH);
 	u8 git_dirty = (tag_version >> 31) & 0x1;
 	u8 major = (tag_version >> 24) & 0x7F;
 	u8 minor = (tag_version >> 16) & 0xFF;
