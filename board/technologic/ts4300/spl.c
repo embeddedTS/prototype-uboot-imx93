@@ -65,7 +65,7 @@ void spl_board_init(void)
 		printf("Fail to start RNG: %d\n", ret);
 }
 
-extern struct dram_timing_info dram_timing_alliance_8gb_3200;
+extern struct dram_timing_info dram_timing_alliance_8gb_1866;
 extern struct dram_timing_info dram_timing_8gb_3733;
 void spl_dram_init(void)
 {
@@ -92,7 +92,7 @@ void spl_dram_init(void)
 		printf("DDR: 1 GB (resistor_straps=%04x)\n", resistor_straps);
 	} else {
 		/* 2GB Part, but only 1 rank is usable on this prototype */
-		ptiming = &dram_timing_alliance_8gb_3200;
+		ptiming = &dram_timing_alliance_8gb_1866;
 		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n",
 				resistor_straps);
 	}
