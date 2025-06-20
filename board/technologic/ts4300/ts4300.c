@@ -61,7 +61,7 @@ static const iomux_v3_cfg_t fec_enet_pads[] = {
 struct efi_fw_image fw_images[] = {
 	{
 		.image_type_id = IMX_BOOT_IMAGE_GUID,
-		.fw_name = u"IMX93-TS-9370",
+		.fw_name = u"IMX93-TS-4300",
 		.image_index = 1,
 	},
 };
@@ -84,33 +84,6 @@ int board_early_init_f(void)
 	ccm_clk_root_cfg(CCM_CKO1_CLK_ROOT, OSC_24M_CLK, 1);
 
 	return 0;
-}
-
-int board_fit_config_name_match(const char *name)
-{
-	u16 board_model_register = 0;
-
-	board_model_register = get_board_model_register_early();
-
-	switch (board_model_register) {
-	case 0x9370:
-		if (!strcmp(name, "imx93-ts9370"))
-			return 0;
-		break;
-	case 0x9390:
-		if (!strcmp(name, "imx93-ts9390"))
-			return 0;
-		break;
-	case 0x0000:
-		// Default if board_model_register can't be read at this time:
-		if (!strcmp(name, CONFIG_DEFAULT_DEVICE_TREE))
-			return 0;
-		break;
-	default:
-		// -EINVAL if the board model is unrecognized
-		break;
-	}
-	return -EINVAL;
 }
 
 static int setup_fec(void)
@@ -168,45 +141,15 @@ int board_init(void)
 	return 0;
 }
 
-static void findfdt(void)
-{
-	u16 model = get_board_model_register();
-	const char *fdtfile = NULL;
-
-	switch (model) {
-	case 0x9390:
-		fdtfile = "imx93-ts9390.dtb";
-		break;
-	case 0x9370:
-		fdtfile = "imx93-ts9370.dtb";
-		break;
-	default:
-		printf("Unknown model 0x%X, can't set fdtfile\n", model);
-		break;
-	}
-
-	env_set("fdtfile", fdtfile);
-}
-
 int board_late_init(void)
 {
 	char rev_as_str[2] = {0};
 	u32 cpu_straps;
 	u32 board_straps;
-	u16 model;
-	int n_macs;
 
-	model = get_board_model_register();
-
-	if (model == 0x4300)
-		/* The TS-4300 has 2 onboard ethernets, and is allocated a spare for
-		 * any carrier board Ethernets
-		 */
-		n_macs = 3;
-	else
-		/* SBCs have two onboard ethernets. */
-		n_macs = 2;
-	setup_mac_addresses(n_macs);
+	/* TS-4300 has 2 onboard ethernet, and reserves 1 mac for some carrier
+	 * boards that have a USB ethernet */
+	setup_mac_addresses(3);
 
 #ifdef CONFIG_ENV_IS_IN_MMC
 	board_late_mmc_env_init();
@@ -232,7 +175,6 @@ int board_late_init(void)
 	env_set_hex("board_early_straps", board_straps);
 #endif
 
-	findfdt();
 	fpga_update_from_flash();
 
 	if (!env_get("skip_fpga_reconfig")) {
@@ -243,22 +185,13 @@ int board_late_init(void)
 	}
 	print_fpga_version();
 
-	if (model == 0x9370 || model == 0x9390) {
-		/* Take USB HUB out of reset */
-		writel(1 << 4, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
+	/* Drive EN_USB_HOST_5V high */
+	writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
 
-		/* Turn on power to USB ports */
-		writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
-		writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
-	} else if (model == 0x4300) {
-		/* Drive EN_USB_HOST_5V high */
-		writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
-
-		/* Pulse OFF_BD_RESET# for 1ms */
-		writel(1 << 6, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
-		mdelay(1);
-		writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
-	}
+	/* Pulse OFF_BD_RESET# for 1ms */
+	writel(1 << 6, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
+	mdelay(1);
+	writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
 
 	/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
 	writel(1 << 2, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));

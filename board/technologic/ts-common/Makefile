@@ -6,5 +6,7 @@
 
 ifndef CONFIG_SPL_BUILD
 obj-y += ts-macs.o
+obj-y += fpga_bootloader.o
+obj-y += tsfpga.o
 endif
 obj-y += wizard.o
