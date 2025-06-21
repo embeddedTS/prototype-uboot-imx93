@@ -85,8 +85,8 @@ void spl_dram_init(void)
 	 */
 
 	/* This will be cleaned up after the prototypes */
-	/* 007e = 1gb, 0x7a = 2gb*/
-	if (resistor_straps & (1 << 2)) {
+	/* 007e = 1gb, 0x7a/0x7c = 2gb*/
+	if (resistor_straps == 0x7e) {
 		/* 1GB Part*/
 		ptiming = &dram_timing_8gb_3733;
 		printf("DDR: 1 GB (resistor_straps=%04x)\n", resistor_straps);
