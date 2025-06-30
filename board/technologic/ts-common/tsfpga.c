@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0+
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <asm/io.h>
 #include "tsfpga.h"
 
@@ -8,6 +11,45 @@ bool fpga_is_bootloader(void)
 	u32 model = readl((void *)FPGA_MODEL);
 
 	return (model == 0xc0de);
+}
+
+void fpga_gpio_set_as_input(uint16_t gpio)
+{
+	int bank = FPGA_BANK_FROM_GPIO(gpio);
+	uint32_t bit_mask = (1 << FPGA_LINE_FROM_GPIO(gpio));
+	assert(bank <= 3);
+
+	writel(bit_mask, FPGA_GPIO_BANK_OE_CLEAR_ADDR(bank));
+}
+
+void fpga_gpio_set_as_output(uint16_t gpio)
+{
+	int bank = FPGA_BANK_FROM_GPIO(gpio);
+	uint32_t bit_mask = (1 << FPGA_LINE_FROM_GPIO(gpio));
+	assert(bank <= 3);
+
+	writel(bit_mask, FPGA_GPIO_BANK_OE_SET_ADDR(bank));
+}
+
+void fpga_gpio_output(uint16_t gpio, bool value)
+{
+	int bank = FPGA_BANK_FROM_GPIO(gpio);
+	uint32_t bit_mask = (1 << FPGA_LINE_FROM_GPIO(gpio));
+	assert(bank < N_FPGA_GPIO_BANKS);
+	if (value)
+		writel(bit_mask, FPGA_GPIO_BANK_DATA_SET_ADDR(bank));
+	else
+		writel(bit_mask, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(bank));
+}
+
+bool fpga_gpio_input(uint16_t gpio)
+{
+	int bank = FPGA_BANK_FROM_GPIO(gpio);
+	uint32_t bit_mask = (1 << FPGA_LINE_FROM_GPIO(gpio));
+	assert(bank < N_FPGA_GPIO_BANKS);
+	if (readl(FPGA_GPIO_BANK_DATA_IN_ADDR(bank)) & bit_mask)
+		return true;
+	return false;
 }
 
 void print_fpga_version(void)

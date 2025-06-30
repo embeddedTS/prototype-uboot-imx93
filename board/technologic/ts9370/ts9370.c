@@ -250,18 +250,18 @@ int board_late_init(void)
 		/* Turn on power to USB ports */
 		writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
 		writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
+		/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
+		writel(1 << 2, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
 	} else if (model == 0x4300) {
 		/* Drive EN_USB_HOST_5V high */
 		writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
-
 		/* Pulse OFF_BD_RESET# for 1ms */
-		writel(1 << 6, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
+		writel(1 << 6, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
 		mdelay(1);
 		writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
+		/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
+		writel(1 << 1, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
 	}
-
-	/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
-	writel(1 << 2, FPGA_GPIO_BANK_DATA_CLR_ADDR(0));
 
 	return 0;
 }
