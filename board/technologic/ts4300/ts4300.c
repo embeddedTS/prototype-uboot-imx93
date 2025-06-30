@@ -30,6 +30,8 @@
 #include "../ts-common/tsfpga.h"
 #include "../ts-common/wizard.h"
 
+extern void do_bbdetect(void);
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define UART_PAD_CTRL	(PAD_CTL_DSE(6) | PAD_CTL_FSEL2)
@@ -184,6 +186,8 @@ int board_late_init(void)
 		printf("Skipping FPGA reconfig\n");
 	}
 	print_fpga_version();
+
+	do_bbdetect();
 
 	/* Drive EN_USB_HOST_5V high */
 	writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));

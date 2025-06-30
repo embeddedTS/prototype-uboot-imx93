@@ -12,6 +12,8 @@ obj-y += spl.o
 obj-y += lpddr4x-alliance-8gb-3733.o
 obj-y += lpddr4x-alliance-8gb-3200.o
 endif
+
 obj-y += ../tsimx93-common/
+obj-y += ../ts-common-baseboards/bbdetect.o
 obj-y += ../ts-common/
 obj-y += parse_straps.o
