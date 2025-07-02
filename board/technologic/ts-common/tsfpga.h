@@ -36,8 +36,8 @@
 
 bool fpga_is_bootloader(void);
 void print_fpga_version(void);
-bool fpga_gpio_set_as_input(uint16_t gpio);
-bool fpga_gpio_set_as_output(uint16_t gpio);
+void fpga_gpio_set_as_input(uint16_t gpio);
+void fpga_gpio_set_as_output(uint16_t gpio);
 void fpga_gpio_output(uint16_t gpio, bool value);
 bool fpga_gpio_input(uint16_t gpio);
 
