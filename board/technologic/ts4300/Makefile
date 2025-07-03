@@ -15,5 +15,6 @@ endif
 
 obj-y += ../tsimx93-common/
 obj-y += ../ts-common-baseboards/bbdetect.o
+obj-y += ../ts-common-baseboards/ts_extension_boards.o
 obj-y += ../ts-common/
 obj-y += parse_straps.o
