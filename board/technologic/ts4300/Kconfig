@@ -12,4 +12,8 @@ config SYS_CONFIG_NAME
 config DDR_MEM_SIZE
 	hex "DDR4 size used to select correct initialization."
 	default 0x10000000
+
+config SUPPORT_EXTENSION_SCAN
+       default y
+
 endif
