@@ -31,6 +31,10 @@
 #define BOOTENV
 #endif
 
+#if defined(CONFIG_CMD_EXTENSION)
+#  define FDTOVERLAY_ADDR "fdtoverlay_addr_r=0x83100000\0"
+#endif
+
 #define JH_ROOT_DTB    "imx93-ts4300.dtb"
 
 #define JAILHOUSE_ENV \
@@ -62,6 +66,7 @@
 	"splashimage=0x90000000\0" \
 	"console=ttyLP0,115200 earlycon\0" \
 	"fdt_addr_r=0x83000000\0"			\
+	FDTOVERLAY_ADDR \
 	"fdtfile=imx93-ts4300.dtb'\0" \
 	"fdt_addr=0x83000000\0"			\
 	"fdt_high=0xffffffffffffffff\0"		\
