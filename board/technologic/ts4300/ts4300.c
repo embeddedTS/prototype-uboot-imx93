@@ -31,6 +31,7 @@
 #include "../ts-common/wizard.h"
 
 extern void do_bbdetect(void);
+extern bool construct_baseboard_overlay_str(char *, int, char *);
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -148,6 +149,7 @@ int board_late_init(void)
 	char rev_as_str[2] = {0};
 	u32 cpu_straps;
 	u32 board_straps;
+	char baseboard_overlay_str[64] = {0};
 
 	/* TS-4300 has 2 onboard ethernet, and reserves 1 mac for some carrier
 	 * boards that have a USB ethernet */
@@ -188,6 +190,11 @@ int board_late_init(void)
 	print_fpga_version();
 
 	do_bbdetect();
+	if (construct_baseboard_overlay_str(baseboard_overlay_str,
+					    sizeof(baseboard_overlay_str),
+					    "")) {
+		env_set("fdt_overlays", baseboard_overlay_str);
+	}
 
 	/* Drive EN_USB_HOST_5V high */
 	writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
