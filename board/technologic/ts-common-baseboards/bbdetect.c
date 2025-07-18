@@ -1,13 +1,7 @@
-
 #include <env.h>
 #include <stdio.h>
 
 #include "../ts-common/tsfpga.h"
-
-/*
- * When this was written, a lot of information was wrong or
- * out-of-date. The Linux device tree was correct, though.
- */
 
 void do_bbdetect(void)
 {
