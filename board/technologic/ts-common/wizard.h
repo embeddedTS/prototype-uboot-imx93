@@ -40,6 +40,7 @@ int super_read(u16 addr, u16 *value);
 int wizard_read_mac(uint8_t *mac_buffer);
 u16 wizard_byte_order(u16 addr_value);
 
+const char *get_board_name(void);
 u16 get_board_model_register(void);
 u16 get_board_model_register_early(void);
 #endif // __SUPER_H__

@@ -86,33 +86,6 @@ int board_early_init_f(void)
 	return 0;
 }
 
-int board_fit_config_name_match(const char *name)
-{
-	u16 board_model_register = 0;
-
-	board_model_register = get_board_model_register_early();
-
-	switch (board_model_register) {
-	case 0x9370:
-		if (!strcmp(name, "imx93-ts9370"))
-			return 0;
-		break;
-	case 0x9390:
-		if (!strcmp(name, "imx93-ts9390"))
-			return 0;
-		break;
-	case 0x0000:
-		// Default if board_model_register can't be read at this time:
-		if (!strcmp(name, CONFIG_DEFAULT_DEVICE_TREE))
-			return 0;
-		break;
-	default:
-		// -EINVAL if the board model is unrecognized
-		break;
-	}
-	return -EINVAL;
-}
-
 static int setup_fec(void)
 {
 	imx_iomux_v3_setup_multiple_pads(fec_enet_pads, ARRAY_SIZE(fec_enet_pads));
@@ -168,45 +141,14 @@ int board_init(void)
 	return 0;
 }
 
-static void findfdt(void)
-{
-	u16 model = get_board_model_register();
-	const char *fdtfile = NULL;
-
-	switch (model) {
-	case 0x9390:
-		fdtfile = "imx93-ts9390.dtb";
-		break;
-	case 0x9370:
-		fdtfile = "imx93-ts9370.dtb";
-		break;
-	default:
-		printf("Unknown model 0x%X, can't set fdtfile\n", model);
-		break;
-	}
-
-	env_set("fdtfile", fdtfile);
-}
-
 int board_late_init(void)
 {
-	char rev_as_str[2] = {0};
-	u32 cpu_straps;
-	u32 board_straps;
+	u32 bom_straps;
 	u16 model;
-	int n_macs;
 
 	model = get_board_model_register();
 
-	if (model == 0x4300)
-		/* The TS-4300 has 2 onboard ethernets, and is allocated a spare for
-		 * any carrier board Ethernets
-		 */
-		n_macs = 3;
-	else
-		/* SBCs have two onboard ethernets. */
-		n_macs = 2;
-	setup_mac_addresses(n_macs);
+	setup_mac_addresses(2);
 
 #ifdef CONFIG_ENV_IS_IN_MMC
 	board_late_mmc_env_init();
@@ -217,22 +159,14 @@ int board_late_init(void)
 	env_set("sec_boot", "yes");
 #endif
 
+	bom_straps = read_bom_straps();
+	env_set_hex("bom_straps", bom_straps);
+
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-	env_set("model", get_board_model());
-
-	cpu_straps = read_raw_cpu_straps();
-	env_set_hex("raw_cpu_straps", cpu_straps);
-
 	env_set("board_name", get_board_name());
-	rev_as_str[0] = get_board_version_char();
-	env_set("board_rev", rev_as_str);
-	env_set("board_rev_name", get_board_version_str());
-	env_set_hex("board_rev_straps", get_straps());
-	board_straps = get_straps();
-	env_set_hex("board_early_straps", board_straps);
+	env_set("board_rev", get_board_version_str());
 #endif
 
-	findfdt();
 	fpga_update_from_flash();
 
 	if (!env_get("skip_fpga_reconfig")) {
@@ -243,25 +177,14 @@ int board_late_init(void)
 	}
 	print_fpga_version();
 
-	if (model == 0x9370 || model == 0x9390) {
-		/* Take USB HUB out of reset */
-		writel(1 << 4, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
+	/* Take USB HUB out of reset */
+	writel(1 << 4, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
 
-		/* Turn on power to USB ports */
-		writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
-		writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
-		/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
-		writel(1 << 2, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
-	} else if (model == 0x4300) {
-		/* Drive EN_USB_HOST_5V high */
-		writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
-		/* Pulse OFF_BD_RESET# for 1ms */
-		writel(1 << 6, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
-		mdelay(1);
-		writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
-		/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
-		writel(1 << 1, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
-	}
+	/* Turn on power to USB ports */
+	writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
+	writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
+	/* Leave on RED LED by default. */
+	writel(1 << 2, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
 
 	return 0;
 }
@@ -269,7 +192,6 @@ int board_late_init(void)
 #ifdef CONFIG_DTB_RESELECT
 int embedded_dtb_select(void)
 {
-	// If CONFIG_DISPLAY_BOARDINFO!=n, you'll see "Model: TS-4300" until board_init() runs
 	fdtdec_setup();
 	return 0;
 }
@@ -283,3 +205,35 @@ int is_recovery_key_pressing(void)
 }
 #endif /*CONFIG_ANDROID_RECOVERY*/
 #endif /*CONFIG_FSL_FASTBOOT*/
+
+int fdt_update_straps(void *fdt)
+{
+	u32 bom_options;
+	int chosen_node;
+	int ret;
+
+	bom_options = (u32)read_bom_straps();
+
+	chosen_node = fdt_path_offset(fdt, "/chosen");
+	if (chosen_node < 0) {
+		printf("Failed to find /chosen node: %d\n", chosen_node);
+		return -1;
+	}
+	ret = fdt_setprop(fdt, chosen_node, "bom-options", &bom_options, sizeof(bom_options));
+	if (ret < 0) {
+		printf("Failed to set property bom-straps: %d\n", ret);
+		return -1;
+	}
+	return 0;
+}
+
+int ft_board_setup(void *fdt, struct bd_info *bd)
+{
+	int ret;
+
+	ret = fdt_update_straps(fdt);
+	if (ret)
+		return ret;
+
+	return 0;
+}
