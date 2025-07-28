@@ -12,7 +12,7 @@
 #include "wizard.h"
 
 /*
- * super_get_i2c_chip - Locate the Wizard
+ * wizard_get_i2c_chip - Locate the Wizard
  *
  * On early prototypes the wizard is on bus 0, on new designs
  * it is on bus 3. When the early prototypes are dropped this
@@ -22,7 +22,7 @@
  * This has to work using the provisional/default device tree; before
  * the correct device tree for this board model has been selected.
  */
-static struct udevice *super_get_i2c_chip(void)
+static struct udevice *wizard_get_i2c_chip(void)
 {
 	static struct udevice *chip;
 	static bool found;
@@ -40,7 +40,7 @@ static struct udevice *super_get_i2c_chip(void)
 		if (ret)
 			continue;
 
-		ret = i2c_get_chip(bus, SUPER_I2C_ADDR, 2, &chip);
+		ret = i2c_get_chip(bus, WIZARD_I2C_ADDR, 2, &chip);
 		if (ret)
 			continue;
 
@@ -58,23 +58,23 @@ static struct udevice *super_get_i2c_chip(void)
 	return chip;
 }
 
-int super_write(u16 addr, u16 value)
+int wizard_write(u16 addr, u16 value)
 {
 	struct udevice *chip;
 
-	chip = super_get_i2c_chip();
+	chip = wizard_get_i2c_chip();
 	if (!chip)
 		return -ENODEV;
 
 	return dm_i2c_write(chip, cpu_to_be16(addr), (uint8_t *)&value, 2);
 }
 
-int super_read(u16 addr, u16 *value)
+int wizard_read(u16 addr, u16 *value)
 {
 	struct udevice *chip;
 	int ret;
 
-	chip = super_get_i2c_chip();
+	chip = wizard_get_i2c_chip();
 	if (!chip) {
 		printf("Error: No I2C chip found\n");
 		return -ENODEV;
@@ -91,13 +91,13 @@ int super_read(u16 addr, u16 *value)
 
 int wizard_read_mac(uint8_t *mac_buffer)
 {
-	u16 reg_addr = SUPER_SERIAL;
+	u16 reg_addr = WIZARD_SERIAL;
 	int n_words = 3;
 	u16 word;
 	int ret;
 
 	while (n_words--) {
-		ret = super_read(reg_addr, &word);
+		ret = wizard_read(reg_addr, &word);
 		if (ret) {
 			printf("i2c read failed at addr %04x, rc=%d (-ve)\n",
 			       reg_addr, ret);
@@ -118,7 +118,7 @@ u16 get_board_model_register(void)
 	int ret;
 
 	if (!found) {
-		ret = super_read(0, &board_model_register);
+		ret = wizard_read(0, &board_model_register);
 		if (!ret)
 			found = 1;
 	}
@@ -150,58 +150,4 @@ const char *get_board_name(void)
 		loaded = 1;
 	}
 	return name_str;
-}
-
-static struct udevice *super_get_i2c_chip_early(void)
-{
-	struct udevice *chip;
-	struct udevice *bus;
-	u16 le_value;
-	int busses[2] = {3, 0};
-	int i;
-	int ret = 1;
-
-	for (i = 0; i < (sizeof(busses) / sizeof(int)); i++) {
-		ret = uclass_get_device_by_seq(UCLASS_I2C, busses[i], &bus);
-		if (ret)
-			continue;
-
-		ret = i2c_get_chip(bus, SUPER_I2C_ADDR, 2, &chip);
-		if (ret)
-			continue;
-
-		ret = dm_i2c_read(chip, cpu_to_be16(0),
-				  (uint8_t *)&le_value,
-				  sizeof(le_value));
-		if (!ret)
-			break;
-	}
-	if (ret)
-		return NULL;
-
-	return chip;
-}
-
-int super_read_early(u16 addr, u16 *value)
-{
-	struct udevice *chip;
-	int ret;
-
-	chip = super_get_i2c_chip_early();
-	if (!chip)
-		return -ENODEV;
-
-	ret = dm_i2c_read(chip, cpu_to_be16(addr), (uint8_t *)value, 2);
-	if (ret)
-		return ret;
-
-	return 0;
-}
-
-u16 get_board_model_register_early(void)
-{
-	u16 board_model_register = 0;
-
-	super_read_early(0, &board_model_register);
-	return board_model_register;
 }
