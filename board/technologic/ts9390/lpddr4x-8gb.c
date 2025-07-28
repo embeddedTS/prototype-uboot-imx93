@@ -1,16 +1,18 @@
 /*
- * Copyright 2025 NXP
+ * Copyright 2024, 2025 NXP
+ * Copyright 2025 Technologic Systems, Inc. (dba embeddedTS)
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Timing to use one of the Allance 2GB's two ranks.
- *
- * Code generated with DDR Tool v3.5.0_8.4-1ddf053d.
+ * Code generated with DDR Tool v3.3.0_7.8-d1cdb7d3 (8gb).
+ * Code generated with DDR Tool v3.5.0_8.4-1ddf053d (half-16gb).
  * DDR PHY FW2022.01
  *
- * This is the auto-generated config. Three configs was too much to
- * fit in the SPL, so the few differences have been merged into
- * lpddr4x-8gb-3733.c. This file is just here for reference.
+ * Each of these files adds ~30K to the SPL image. The Alliance
+ * "half-16gb" config is 95% identical to the Alliance 8gb, so it is
+ * included here along with the table that contains the differences.
+ *
+ * The differences are in the first entry of ddr_dram_fsp_cfg.
  */
 
 #include <linux/kernel.h>
@@ -40,7 +42,92 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
 };
 
 /* dram fsp cfg */
-static struct dram_fsp_cfg ddr_dram_fsp_cfg[] = {
+static struct dram_fsp_cfg ddr_dram_fsp_cfg_8gb[] = {
+    {
+        {
+            {0x4e300100, 0x24A0321B},
+            {0x4e300104, 0xF8EE001B},
+            {0x4e300108, 0x2F2E3233},
+            {0x4e30010C, 0x0005C18B},
+            {0x4e300124, 0x1C790000},
+            {0x4e300160, 0x00009102},
+            {0x4e30016C, 0x35F00000},
+            {0x4e300170, 0x8B0B0608},
+            {0x4e300250, 0x00000028},
+            {0x4e300254, 0x00FE00FE},
+            {0x4e300258, 0x00000008},
+            {0x4e30025C, 0x00000400},
+            {0x4e300300, 0x224F2213},
+            {0x4e300304, 0x00FE2213},
+            {0x4e300308, 0x0A380E3D},
+        },
+        {
+            {0x01, 0xE4},
+            {0x02, 0x36},
+            {0x03, 0x32},
+            {0x0b, 0x46},
+            {0x0c, 0x11},
+            {0x0e, 0x11},
+            {0x16, 0x04},
+        },
+        0,
+    },
+    {
+        {
+            {0x4e300100, 0x124F2100},
+            {0x4e300104, 0xF877000E},
+            {0x4e300108, 0x1816E4AA},
+            {0x4e30010C, 0x005101E6},
+            {0x4e300124, 0x0E3C0000},
+            {0x4e300160, 0x00009101},
+            {0x4e30016C, 0x30900000},
+            {0x4e300170, 0x8A0A0508},
+            {0x4e300250, 0x00000014},
+            {0x4e300254, 0x007B007B},
+            {0x4e300258, 0x00000008},
+            {0x4e30025C, 0x00000400},
+        },
+        {
+            {0x01, 0xB4},
+            {0x02, 0x1B},
+            {0x03, 0x32},
+            {0x0b, 0x46},
+            {0x0c, 0x11},
+            {0x0e, 0x11},
+            {0x16, 0x04},
+        },
+        0,
+    },
+    {
+        {
+            {0x4e300100, 0x00051000},
+            {0x4e300104, 0xF855000A},
+            {0x4e300108, 0x6E620A48},
+            {0x4e30010C, 0x0031010D},
+            {0x4e300124, 0x04C50000},
+            {0x4e300160, 0x00009100},
+            {0x4e30016C, 0x30000000},
+            {0x4e300170, 0x89090408},
+            {0x4e300250, 0x00000007},
+            {0x4e300254, 0x00240024},
+            {0x4e300258, 0x00000008},
+            {0x4e30025C, 0x00000400},
+        },
+        {
+            {0x01, 0x94},
+            {0x02, 0x9},
+            {0x03, 0x32},
+            {0x0b, 0x46},
+            {0x0c, 0x11},
+            {0x0e, 0x11},
+            {0x16, 0x04},
+        },
+        1,
+    },
+
+};
+
+static struct dram_fsp_cfg ddr_dram_fsp_cfg_half_16gb[] = {
     {
         {
             {0x4e300100, 0x24A0321B},
@@ -1987,7 +2074,7 @@ static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
 };
 
 /* ddr timing config params */
-struct dram_timing_info dram_timing_half_16gb_3733 = {
+struct dram_timing_info dram_timing_8gb = {
     .ddrc_cfg = ddr_ddrc_cfg,
     .ddrc_cfg_num = ARRAY_SIZE(ddr_ddrc_cfg),
     .ddrphy_cfg = ddr_ddrphy_cfg,
@@ -1999,7 +2086,6 @@ struct dram_timing_info dram_timing_half_16gb_3733 = {
     .ddrphy_pie = ddr_phy_pie,
     .ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
     .fsp_table = { 3733, 1866, 625, },
-    .fsp_cfg = ddr_dram_fsp_cfg,
-    .fsp_cfg_num = ARRAY_SIZE(ddr_dram_fsp_cfg),
+    .fsp_cfg = ddr_dram_fsp_cfg_8gb,
+    .fsp_cfg_num = ARRAY_SIZE(ddr_dram_fsp_cfg_8gb),
 };
-
