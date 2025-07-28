@@ -1,18 +1,10 @@
 /*
- * Copyright 2024, 2025 NXP
- * Copyright 2025 Technologic Systems, Inc. (dba embeddedTS)
+ * Copyright 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Code generated with DDR Tool v3.3.0_7.8-d1cdb7d3 (8gb).
- * Code generated with DDR Tool v3.5.0_8.4-1ddf053d (half-16gb).
+ * Code generated with DDR Tool v3.6.0_8.5-aa018543.
  * DDR PHY FW2022.01
- *
- * Each of these files adds ~30K to the SPL image. The Alliance
- * "half-16gb" config is 95% identical to the Alliance 8gb, so it is
- * included here along with the table that contains the differences.
- *
- * The differences are in the first entry of ddr_dram_fsp_cfg.
  */
 
 #include <linux/kernel.h>
@@ -42,28 +34,28 @@ static struct dram_cfg_param ddr_ddrc_cfg[] = {
 };
 
 /* dram fsp cfg */
-static struct dram_fsp_cfg ddr_dram_fsp_cfg_8gb[] = {
+static struct dram_fsp_cfg ddr_dram_fsp_cfg[] = {
     {
         {
-            {0x4e300100, 0x24A0321B},
-            {0x4e300104, 0xF8EE001B},
-            {0x4e300108, 0x2F2E3233},
-            {0x4e30010C, 0x0005C18B},
-            {0x4e300124, 0x1C790000},
-            {0x4e300160, 0x00009102},
-            {0x4e30016C, 0x35F00000},
+            {0x4e300100, 0x145B311B},
+            {0x4e300104, 0x5DCC0017},
+            {0x4e300108, 0xD4D68E00},
+            {0x4e30010C, 0x0071E100},
+            {0x4e300124, 0x18030000},
+            {0x4e300160, 0x0000E101},
+            {0x4e30016C, 0x33F00000},
             {0x4e300170, 0x8B0B0608},
-            {0x4e300250, 0x00000028},
-            {0x4e300254, 0x00FE00FE},
+            {0x4e300250, 0x00000022},
+            {0x4e300254, 0x00D800D8},
             {0x4e300258, 0x00000008},
             {0x4e30025C, 0x00000400},
-            {0x4e300300, 0x224F2213},
-            {0x4e300304, 0x00FE2213},
-            {0x4e300308, 0x0A380E3D},
+            {0x4e300300, 0x1D441D0D},
+            {0x4e300304, 0x00D81E10},
+            {0x4e300308, 0x0C3C0C03},
         },
         {
-            {0x01, 0xE4},
-            {0x02, 0x36},
+            {0x01, 0xD4},
+            {0x02, 0x2D},
             {0x03, 0x32},
             {0x0b, 0x46},
             {0x0c, 0x11},
@@ -75,11 +67,11 @@ static struct dram_fsp_cfg ddr_dram_fsp_cfg_8gb[] = {
     {
         {
             {0x4e300100, 0x124F2100},
-            {0x4e300104, 0xF877000E},
+            {0x4e300104, 0x5D77000E},
             {0x4e300108, 0x1816E4AA},
             {0x4e30010C, 0x005101E6},
-            {0x4e300124, 0x0E3C0000},
-            {0x4e300160, 0x00009101},
+            {0x4e300124, 0x0E030000},
+            {0x4e300160, 0x0000E101},
             {0x4e30016C, 0x30900000},
             {0x4e300170, 0x8A0A0508},
             {0x4e300250, 0x00000014},
@@ -101,96 +93,11 @@ static struct dram_fsp_cfg ddr_dram_fsp_cfg_8gb[] = {
     {
         {
             {0x4e300100, 0x00051000},
-            {0x4e300104, 0xF855000A},
+            {0x4e300104, 0x5D55000A},
             {0x4e300108, 0x6E620A48},
             {0x4e30010C, 0x0031010D},
-            {0x4e300124, 0x04C50000},
-            {0x4e300160, 0x00009100},
-            {0x4e30016C, 0x30000000},
-            {0x4e300170, 0x89090408},
-            {0x4e300250, 0x00000007},
-            {0x4e300254, 0x00240024},
-            {0x4e300258, 0x00000008},
-            {0x4e30025C, 0x00000400},
-        },
-        {
-            {0x01, 0x94},
-            {0x02, 0x9},
-            {0x03, 0x32},
-            {0x0b, 0x46},
-            {0x0c, 0x11},
-            {0x0e, 0x11},
-            {0x16, 0x04},
-        },
-        1,
-    },
-
-};
-
-static struct dram_fsp_cfg ddr_dram_fsp_cfg_half_16gb[] = {
-    {
-        {
-            {0x4e300100, 0x24A0321B},
-            {0x4e300104, 0xF8EE001B},
-            {0x4e300108, 0x2F2E3233},
-            {0x4e30010C, 0x0005E18B},
-            {0x4e300124, 0x1C760000},
-            {0x4e300160, 0x00009102},
-            {0x4e30016C, 0x35F00000},
-            {0x4e300170, 0x8B0B0608},
-            {0x4e300250, 0x00000028},
-            {0x4e300254, 0x00FE00FE},
-            {0x4e300258, 0x00000008},
-            {0x4e30025C, 0x00000400},
-            {0x4e300300, 0x224F2213},
-            {0x4e300304, 0x00FE2213},
-            {0x4e300308, 0x0A3C0E3D},
-        },
-        {
-            {0x01, 0xE4},
-            {0x02, 0x36},
-            {0x03, 0x32},
-            {0x0b, 0x46},
-            {0x0c, 0x11},
-            {0x0e, 0x11},
-            {0x16, 0x04},
-        },
-        0,
-    },
-    {
-        {
-            {0x4e300100, 0x124F2100},
-            {0x4e300104, 0xF877000E},
-            {0x4e300108, 0x1816E4AA},
-            {0x4e30010C, 0x005101E6},
-            {0x4e300124, 0x0E3C0000},
-            {0x4e300160, 0x00009101},
-            {0x4e30016C, 0x30900000},
-            {0x4e300170, 0x8A0A0508},
-            {0x4e300250, 0x00000014},
-            {0x4e300254, 0x007B007B},
-            {0x4e300258, 0x00000008},
-            {0x4e30025C, 0x00000400},
-        },
-        {
-            {0x01, 0xB4},
-            {0x02, 0x1B},
-            {0x03, 0x32},
-            {0x0b, 0x46},
-            {0x0c, 0x11},
-            {0x0e, 0x11},
-            {0x16, 0x04},
-        },
-        0,
-    },
-    {
-        {
-            {0x4e300100, 0x00051000},
-            {0x4e300104, 0xF855000A},
-            {0x4e300108, 0x6E620A48},
-            {0x4e30010C, 0x0031010D},
-            {0x4e300124, 0x04C50000},
-            {0x4e300160, 0x00009100},
+            {0x4e300124, 0x04830000},
+            {0x4e300160, 0x0000E100},
             {0x4e30016C, 0x30000000},
             {0x4e300170, 0x89090408},
             {0x4e300250, 0x00000007},
@@ -281,18 +188,18 @@ static struct dram_cfg_param ddr_ddrphy_cfg[] = {
     {0x21014d, 0x600},
     {0x21104d, 0x600},
     {0x21114d, 0x600},
-    {0x10049, 0xe00},
-    {0x10149, 0xe00},
-    {0x11049, 0xe00},
-    {0x11149, 0xe00},
-    {0x110049, 0xe00},
-    {0x110149, 0xe00},
-    {0x111049, 0xe00},
-    {0x111149, 0xe00},
-    {0x210049, 0xe00},
-    {0x210149, 0xe00},
-    {0x211049, 0xe00},
-    {0x211149, 0xe00},
+    {0x10049, 0x604},
+    {0x10149, 0x604},
+    {0x11049, 0x604},
+    {0x11149, 0x604},
+    {0x110049, 0x604},
+    {0x110149, 0x604},
+    {0x111049, 0x604},
+    {0x111149, 0x604},
+    {0x210049, 0x604},
+    {0x210149, 0x604},
+    {0x211049, 0x604},
+    {0x211149, 0x604},
     {0x43, 0x60},
     {0x1043, 0x60},
     {0x2043, 0x60},
@@ -300,7 +207,7 @@ static struct dram_cfg_param ddr_ddrphy_cfg[] = {
     {0x20075, 0x4},
     {0x20050, 0x0},
     {0x2009b, 0x2},
-    {0x20008, 0x3a5},
+    {0x20008, 0x320},
     {0x120008, 0x1d3},
     {0x220008, 0x9c},
     {0x20088, 0x9},
@@ -1330,33 +1237,33 @@ static struct dram_cfg_param ddr_ddrphy_trained_csr[] = {
 /* P0 message block parameter for training firmware */
 static struct dram_cfg_param ddr_fsp0_cfg[] = {
     {0xd0000, 0x0},
-    {0x54003, 0xe94},
+    {0x54003, 0xc80},
     {0x54004, 0x4},
     {0x54006, 0x15},
     {0x54008, 0x131f},
-    {0x54009, 0xc8},
+    {0x54009, 0x4},
     {0x5400b, 0x4},
     {0x5400d, 0x100},
     {0x5400f, 0x100},
     {0x54012, 0x110},
-    {0x54019, 0x36e4},
+    {0x54019, 0x2dd4},
     {0x5401a, 0x32},
     {0x5401b, 0x1146},
     {0x5401c, 0x1108},
     {0x5401e, 0x4},
-    {0x5401f, 0x36e4},
+    {0x5401f, 0x2dd4},
     {0x54020, 0x32},
     {0x54021, 0x1146},
     {0x54022, 0x1108},
     {0x54024, 0x4},
-    {0x54032, 0xe400},
-    {0x54033, 0x3236},
+    {0x54032, 0xd400},
+    {0x54033, 0x322d},
     {0x54034, 0x4600},
     {0x54035, 0x811},
     {0x54036, 0x11},
     {0x54037, 0x400},
-    {0x54038, 0xe400},
-    {0x54039, 0x3236},
+    {0x54038, 0xd400},
+    {0x54039, 0x322d},
     {0x5403a, 0x4600},
     {0x5403b, 0x811},
     {0x5403c, 0x11},
@@ -1372,7 +1279,7 @@ static struct dram_cfg_param ddr_fsp1_cfg[] = {
     {0x54004, 0x4},
     {0x54006, 0x15},
     {0x54008, 0x121f},
-    {0x54009, 0xc8},
+    {0x54009, 0x4},
     {0x5400b, 0x4},
     {0x5400d, 0x100},
     {0x5400f, 0x100},
@@ -1410,7 +1317,7 @@ static struct dram_cfg_param ddr_fsp2_cfg[] = {
     {0x54004, 0x4},
     {0x54006, 0x15},
     {0x54008, 0x121f},
-    {0x54009, 0xc8},
+    {0x54009, 0x4},
     {0x5400b, 0x4},
     {0x5400d, 0x100},
     {0x5400f, 0x100},
@@ -1444,34 +1351,34 @@ static struct dram_cfg_param ddr_fsp2_cfg[] = {
 /* P0 2D message block parameter for training firmware */
 static struct dram_cfg_param ddr_fsp0_2d_cfg[] = {
     {0xd0000, 0x0},
-    {0x54003, 0xe94},
+    {0x54003, 0xc80},
     {0x54004, 0x4},
     {0x54006, 0x15},
     {0x54008, 0x61},
-    {0x54009, 0xc8},
+    {0x54009, 0x4},
     {0x5400b, 0x4},
     {0x5400d, 0x100},
     {0x5400f, 0x100},
     {0x54010, 0x2080},
     {0x54012, 0x110},
-    {0x54019, 0x36e4},
+    {0x54019, 0x2dd4},
     {0x5401a, 0x32},
     {0x5401b, 0x1146},
     {0x5401c, 0x1108},
     {0x5401e, 0x4},
-    {0x5401f, 0x36e4},
+    {0x5401f, 0x2dd4},
     {0x54020, 0x32},
     {0x54021, 0x1146},
     {0x54022, 0x1108},
     {0x54024, 0x4},
-    {0x54032, 0xe400},
-    {0x54033, 0x3236},
+    {0x54032, 0xd400},
+    {0x54033, 0x322d},
     {0x54034, 0x4600},
     {0x54035, 0x811},
     {0x54036, 0x11},
     {0x54037, 0x400},
-    {0x54038, 0xe400},
-    {0x54039, 0x3236},
+    {0x54038, 0xd400},
+    {0x54039, 0x322d},
     {0x5403a, 0x4600},
     {0x5403b, 0x811},
     {0x5403c, 0x11},
@@ -1964,9 +1871,9 @@ static struct dram_cfg_param ddr_phy_pie[] = {
     {0x400d7, 0x20b},
     {0x2003a, 0x2},
     {0x200be, 0x3},
-    {0x2000b, 0x41a},
-    {0x2000c, 0xe9},
-    {0x2000d, 0x91c},
+    {0x2000b, 0x384},
+    {0x2000c, 0xc8},
+    {0x2000d, 0x7d0},
     {0x2000e, 0x2c},
     {0x12000b, 0x20d},
     {0x12000c, 0x74},
@@ -2044,8 +1951,8 @@ static struct dram_cfg_param ddr_phy_pie[] = {
 
 static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
     {
-        /* P0 3733mts 1D */
-        .drate = 3733,
+        /* P0 3200mts 1D */
+        .drate = 3200,
         .fw_type = FW_1D_IMAGE,
         .fsp_cfg = ddr_fsp0_cfg,
         .fsp_cfg_num = ARRAY_SIZE(ddr_fsp0_cfg),
@@ -2065,8 +1972,8 @@ static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
         .fsp_cfg_num = ARRAY_SIZE(ddr_fsp2_cfg),
     },
     {
-        /* P0 3733mts 2D */
-        .drate = 3733,
+        /* P0 3200mts 2D */
+        .drate = 3200,
         .fw_type = FW_2D_IMAGE,
         .fsp_cfg = ddr_fsp0_2d_cfg,
         .fsp_cfg_num = ARRAY_SIZE(ddr_fsp0_2d_cfg),
@@ -2074,7 +1981,7 @@ static struct dram_fsp_msg ddr_dram_fsp_msg[] = {
 };
 
 /* ddr timing config params */
-struct dram_timing_info dram_timing_8gb_3733 = {
+struct dram_timing_info dram_timing_8gb = {
     .ddrc_cfg = ddr_ddrc_cfg,
     .ddrc_cfg_num = ARRAY_SIZE(ddr_ddrc_cfg),
     .ddrphy_cfg = ddr_ddrphy_cfg,
@@ -2085,24 +1992,8 @@ struct dram_timing_info dram_timing_8gb_3733 = {
     .ddrphy_trained_csr_num = ARRAY_SIZE(ddr_ddrphy_trained_csr),
     .ddrphy_pie = ddr_phy_pie,
     .ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
-    .fsp_table = { 3733, 1866, 625, },
-    .fsp_cfg = ddr_dram_fsp_cfg_8gb,
-    .fsp_cfg_num = ARRAY_SIZE(ddr_dram_fsp_cfg_8gb),
+    .fsp_table = { 3200, 1866, 625, },
+    .fsp_cfg = ddr_dram_fsp_cfg,
+    .fsp_cfg_num = ARRAY_SIZE(ddr_dram_fsp_cfg),
 };
 
-/* ddr timing config params */
-struct dram_timing_info dram_timing_half_16gb_3733 = {
-    .ddrc_cfg = ddr_ddrc_cfg,
-    .ddrc_cfg_num = ARRAY_SIZE(ddr_ddrc_cfg),
-    .ddrphy_cfg = ddr_ddrphy_cfg,
-    .ddrphy_cfg_num = ARRAY_SIZE(ddr_ddrphy_cfg),
-    .fsp_msg = ddr_dram_fsp_msg,
-    .fsp_msg_num = ARRAY_SIZE(ddr_dram_fsp_msg),
-    .ddrphy_trained_csr = ddr_ddrphy_trained_csr,
-    .ddrphy_trained_csr_num = ARRAY_SIZE(ddr_ddrphy_trained_csr),
-    .ddrphy_pie = ddr_phy_pie,
-    .ddrphy_pie_num = ARRAY_SIZE(ddr_phy_pie),
-    .fsp_table = { 3733, 1866, 625, },
-    .fsp_cfg = ddr_dram_fsp_cfg_half_16gb,
-    .fsp_cfg_num = ARRAY_SIZE(ddr_dram_fsp_cfg_half_16gb),
-};

@@ -76,14 +76,10 @@ struct efi_capsule_update_info update_info = {
 
 #endif /* EFI_HAVE_CAPSULE_SUPPORT */
 
-// Used in SPL:
 int board_early_init_f(void)
 {
 	imx_iomux_v3_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
 	init_uart_clk(LPUART1_CLK_ROOT);
-
-	// Emit a clock for the onboard USB hub
-	ccm_clk_root_cfg(CCM_CKO1_CLK_ROOT, OSC_24M_CLK, 1);
 
 	return 0;
 }
@@ -119,21 +115,6 @@ static int setup_eqos(void)
 
 int board_init(void)
 {
-	if (CONFIG_IS_ENABLED(DTB_RESELECT)) {
-		int rescan;
-		int ret;
-		const char *model;
-
-		ret = fdtdec_resetup(&rescan);
-		if (!ret && rescan) {
-			dm_uninit();
-			dm_init_and_scan(false);
-		}
-		model = fdt_getprop(gd->fdt_blob, 0, "model", NULL);
-		if (model)
-			printf("Model: %s\n", model);
-	}
-
 	if (CONFIG_IS_ENABLED(FEC_MXC))
 		setup_fec();
 
@@ -145,9 +126,7 @@ int board_init(void)
 
 int board_late_init(void)
 {
-	char rev_as_str[2] = {0};
-	u32 cpu_straps;
-	u32 board_straps;
+	u32 bom_straps;
 
 	/* TS-4300 has 2 onboard ethernet, and reserves 1 mac for some carrier
 	 * boards that have a USB ethernet */
@@ -162,19 +141,12 @@ int board_late_init(void)
 	env_set("sec_boot", "yes");
 #endif
 
+	bom_straps = read_bom_straps();
+	env_set_hex("bom_straps", bom_straps);
+
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-	env_set("model", get_board_model());
-
-	cpu_straps = read_raw_cpu_straps();
-	env_set_hex("raw_cpu_straps", cpu_straps);
-
 	env_set("board_name", get_board_name());
-	rev_as_str[0] = get_board_version_char();
-	env_set("board_rev", rev_as_str);
-	env_set("board_rev_name", get_board_version_str());
-	env_set_hex("board_rev_straps", get_straps());
-	board_straps = get_straps();
-	env_set_hex("board_early_straps", board_straps);
+	env_set("board_rev", get_board_version_str());
 #endif
 
 	fpga_update_from_flash();
@@ -197,20 +169,11 @@ int board_late_init(void)
 	mdelay(1);
 	writel(1 << 6, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
 
-	/* Leave on RED LED by default. TODO: Migrate to dts/driver/config*/
+	/* Leave on RED LED by default. */
 	writel(1 << 1, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
 
 	return 0;
 }
-
-#ifdef CONFIG_DTB_RESELECT
-int embedded_dtb_select(void)
-{
-	// If CONFIG_DISPLAY_BOARDINFO!=n, you'll see "Model: TS-4300" until board_init() runs
-	fdtdec_setup();
-	return 0;
-}
-#endif
 
 #ifdef CONFIG_FSL_FASTBOOT
 #ifdef CONFIG_ANDROID_RECOVERY
@@ -220,3 +183,35 @@ int is_recovery_key_pressing(void)
 }
 #endif /*CONFIG_ANDROID_RECOVERY*/
 #endif /*CONFIG_FSL_FASTBOOT*/
+
+int fdt_update_straps(void *fdt)
+{
+	u32 bom_options;
+	int chosen_node;
+	int ret;
+
+	bom_options = (u32)read_bom_straps();
+
+	chosen_node = fdt_path_offset(fdt, "/chosen");
+	if (chosen_node < 0) {
+		printf("Failed to find /chosen node: %d\n", chosen_node);
+		return -1;
+	}
+	ret = fdt_setprop(fdt, chosen_node, "bom-options", &bom_options, sizeof(bom_options));
+	if (ret < 0) {
+		printf("Failed to set property bom-straps: %d\n", ret);
+		return -1;
+	}
+	return 0;
+}
+
+int ft_board_setup(void *fdt, struct bd_info *bd)
+{
+	int ret;
+
+	ret = fdt_update_straps(fdt);
+	if (ret)
+		return ret;
+
+	return 0;
+}

@@ -65,37 +65,14 @@ void spl_board_init(void)
 		printf("Fail to start RNG: %d\n", ret);
 }
 
-extern struct dram_timing_info dram_timing_alliance_8gb_3200;
-extern struct dram_timing_info dram_timing_8gb_3733;
+extern struct dram_timing_info dram_timing_8gb;
 void spl_dram_init(void)
 {
 	struct dram_timing_info *ptiming;
-	u16 resistor_straps = read_raw_cpu_straps();
+	u16 resistor_straps = read_bom_straps();
 
-	/*
-	 * DRAM size can is read from the strapping resistors.
-	 * See sheet 2 of the schematic.
-	 *
-	 *    | GiB  | Manuf.   | Manuf. PN             | Gb |
-	 *    |------+----------+-----------------------+----|
-	 *    |   1  | Alliance | AS4C512M16MD4V-053BIN |  8 |
-	 *    |   2* | Alliance | AS4C1G16MD4V-046BIN   | 16 |
-	 *    |----- +----------+-----------------------+----|
-	 *    * limited to 1 GB at least through 4300/P2
-	 */
-
-	/* This will be cleaned up after the prototypes */
-	/* 007e = 1gb, 0x7a/0x7c = 2gb*/
-	if (resistor_straps == 0x7e) {
-		/* 1GB Part*/
-		ptiming = &dram_timing_8gb_3733;
-		printf("DDR: 1 GB (resistor_straps=%04x)\n", resistor_straps);
-	} else {
-		/* 2GB Part, but only 1 rank is usable on this prototype */
-		ptiming = &dram_timing_alliance_8gb_3200;
-		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n",
-				resistor_straps);
-	}
+	ptiming = &dram_timing_8gb;
+	printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
 
 	printf("DDR: %uMTS\n", ptiming->fsp_msg[0].drate);
 	ddr_init(ptiming);
