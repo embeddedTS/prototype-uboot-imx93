@@ -65,37 +65,23 @@ void spl_board_init(void)
 		printf("Fail to start RNG: %d\n", ret);
 }
 
-extern struct dram_timing_info dram_timing_16gb_3733;
-extern struct dram_timing_info dram_timing_half_16gb_3733;
-extern struct dram_timing_info dram_timing_8gb_3733;
+extern struct dram_timing_info dram_timing_16gb;
+extern struct dram_timing_info dram_timing_8gb;
+
 void spl_dram_init(void)
 {
 	struct dram_timing_info *ptiming;
 	u16 resistor_straps = read_bom_straps();
 
-	/*
-	 * DRAM size can is read from the strapping resistors.
-	 *
-	 *    | GiB  | Manuf.   | Manuf. PN             | Gb |
-	 *    |------+----------+-----------------------+----|
-	 *    |   1  | Alliance | AS4C512M16MD4V-053BIN |  8 |
-	 *    |   2  | Micron   | MT53E1G16D1FW-046     | 16 |
-	 *    |   2  | Alliance | AS4C1G16MD4V-046BIN   | 16 |
-	 *    |----- +----------+-----------------------+----|
-	 */
-
-	if (resistor_straps & (1 << 1)) {
-		printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
-		ptiming = &dram_timing_8gb_3733;
-	} else if ((resistor_straps & (1 << 2)) == 0) {
-		/* TS-9370 P3 only */
-		printf("DDR: 1 GB (dual-rank but second rank is inaccessible), resistor_straps=%04x\n",
-		       resistor_straps);
-		ptiming = &dram_timing_half_16gb_3733;
-	} else {
+	/* R131 = 0 1GB, 1 = 2GB */
+	if (resistor_straps & (1 << 7)) {
 		printf("DDR: 2 GB, resistor_straps=%04x\n", resistor_straps);
-		ptiming = &dram_timing_16gb_3733;
+		ptiming = &dram_timing_16gb;
+	} else {
+		printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
+		ptiming = &dram_timing_8gb;
 	}
+	ptiming = &dram_timing_8gb;
 
 	printf("DDR: %uMTS\n", ptiming->fsp_msg[0].drate);
 	ddr_init(ptiming);

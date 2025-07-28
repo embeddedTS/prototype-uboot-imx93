@@ -74,7 +74,6 @@ struct efi_capsule_update_info update_info = {
 
 #endif /* EFI_HAVE_CAPSULE_SUPPORT */
 
-// Used in SPL:
 int board_early_init_f(void)
 {
 	imx_iomux_v3_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
@@ -117,21 +116,6 @@ static int setup_eqos(void)
 
 int board_init(void)
 {
-	if (CONFIG_IS_ENABLED(DTB_RESELECT)) {
-		int rescan;
-		int ret;
-		const char *model;
-
-		ret = fdtdec_resetup(&rescan);
-		if (!ret && rescan) {
-			dm_uninit();
-			dm_init_and_scan(false);
-		}
-		model = fdt_getprop(gd->fdt_blob, 0, "model", NULL);
-		if (model)
-			printf("Model: %s\n", model);
-	}
-
 	if (CONFIG_IS_ENABLED(FEC_MXC))
 		setup_fec();
 
@@ -144,9 +128,6 @@ int board_init(void)
 int board_late_init(void)
 {
 	u32 bom_straps;
-	u16 model;
-
-	model = get_board_model_register();
 
 	setup_mac_addresses(2);
 
@@ -179,7 +160,6 @@ int board_late_init(void)
 
 	/* Take USB HUB out of reset */
 	writel(1 << 4, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
-
 	/* Turn on power to USB ports */
 	writel(1 << 12, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST1_VBUS */
 	writel(1 << 13, FPGA_GPIO_BANK_DATA_SET_ADDR(0)); /* EN_USB_HOST2_VBUS */
@@ -188,14 +168,6 @@ int board_late_init(void)
 
 	return 0;
 }
-
-#ifdef CONFIG_DTB_RESELECT
-int embedded_dtb_select(void)
-{
-	fdtdec_setup();
-	return 0;
-}
-#endif
 
 #ifdef CONFIG_FSL_FASTBOOT
 #ifdef CONFIG_ANDROID_RECOVERY
