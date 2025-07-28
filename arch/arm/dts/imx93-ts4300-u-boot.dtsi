@@ -93,6 +93,10 @@
 	bootph-pre-ram;
 };
 
+&fpga {
+	nxp,ahb-clk-rate = <66666666>;
+};
+
 &gpio1 {
 	bootph-pre-ram;
 	bootph-some-ram;

@@ -97,12 +97,12 @@
 	bootph-pre-ram;
 };
 
-&pinctrl_usdhc2_sleep {
+&pinctrl_usdhc2 {
 	bootph-pre-ram;
 };
 
-&pinctrl_usdhc2 {
-	bootph-pre-ram;
+&fpga {
+	nxp,ahb-clk-rate = <40000000>;
 };
 
 &gpio1 {

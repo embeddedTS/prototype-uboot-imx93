@@ -80,16 +80,16 @@
 	bootph-pre-ram;
 };
 
+&fpga {
+	nxp,ahb-clk-rate = <66666666>;
+};
+
 &pinctrl_uart1 {
 	bootph-pre-ram;
 	bootph-some-ram;
 };
 
 &pinctrl_usdhc1 {
-	bootph-pre-ram;
-};
-
-&pinctrl_usdhc2_gpio {
 	bootph-pre-ram;
 };
 
