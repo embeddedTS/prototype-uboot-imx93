@@ -81,7 +81,6 @@ void spl_dram_init(void)
 		printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
 		ptiming = &dram_timing_8gb;
 	}
-	ptiming = &dram_timing_8gb;
 
 	printf("DDR: %uMTS\n", ptiming->fsp_msg[0].drate);
 	ddr_init(ptiming);
