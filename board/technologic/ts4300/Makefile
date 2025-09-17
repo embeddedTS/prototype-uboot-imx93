@@ -10,6 +10,7 @@ obj-y += ../../../board/freescale/common/
 ifdef CONFIG_SPL_BUILD
 obj-y += spl.o
 obj-y += lpddr4x-8gb.o
+obj-y += lpddr4x-16gb.o
 endif
 
 obj-y += ../ts-common-baseboards/bbdetect.o

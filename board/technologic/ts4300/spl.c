@@ -66,13 +66,20 @@ void spl_board_init(void)
 }
 
 extern struct dram_timing_info dram_timing_8gb;
+extern struct dram_timing_info dram_timing_16gb_half;
 void spl_dram_init(void)
 {
 	struct dram_timing_info *ptiming;
 	u16 resistor_straps = read_bom_straps();
 
-	ptiming = &dram_timing_8gb;
-	printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
+	/* On P2, R82 is the only difference between rams.  R81 populated = 1G, depopulated = 2G*/
+	if (resistor_straps & (1 << 1)) {
+		printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
+		ptiming = &dram_timing_8gb;
+	} else {
+		printf("DDR: 2 GB (1G Usable), resistor_straps=%04x\n", resistor_straps);
+		ptiming = &dram_timing_16gb_half;
+	}
 
 	printf("DDR: %uMTS\n", ptiming->fsp_msg[0].drate);
 	ddr_init(ptiming);
