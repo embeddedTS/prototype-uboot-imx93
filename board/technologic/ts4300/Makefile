@@ -13,7 +13,7 @@ obj-y += lpddr4x-8gb.o
 obj-y += lpddr4x-16gb.o
 endif
 
-obj-y += ../ts-common-baseboards/bbdetect.o
-obj-y += ../ts-common-baseboards/ts_extension_boards.o
 obj-y += ../ts-common/
 obj-y += parse_straps.o
+obj-y += baseboards.o
+obj-y += bbdetect.o
