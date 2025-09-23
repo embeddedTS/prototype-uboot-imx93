@@ -126,7 +126,7 @@ int extension_board_scan(struct list_head *extension_list)
 		 * reset, and looking for 0x0f to ack.
 		 */
 		if (ts8551_mipi2dp_present()) {
-			struct extension *dc = create_extension("mipi2dpi");
+			struct extension *dc = create_extension("mipi2dp");
 
 			snprintf(dc->name, sizeof(dc->name), "TS-RD-MIPI2DP");
 			list_add_tail(&dc->list, extension_list);
