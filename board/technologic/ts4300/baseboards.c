@@ -46,24 +46,19 @@ struct extension *create_extension(char *suffix)
 	return ext;
 }
 
-		/* Set gpio 6 17=0 */
-		/* Wait 10ms */
-		/* i2c dev 0 */
-		/* i2c probe */
-		/* Detect mipi2dpi card at 0x0f */
-
+/* Returns 1 if the mipi2dp is present */
 int ts8551_mipi2dp_present(void)
 {
 	static struct udevice *chip;
 	struct udevice *bus;
-	uint8_t value;
+	uint32_t value;
 	int ret;
 
 	/* Set CN1_096 high, DP_RESET */
 	writel(1 << 17, FPGA_GPIO_BANK_DATA_SET_ADDR(2));
 	writel(1 << 17, FPGA_GPIO_BANK_OE_SET_ADDR(2));
 	udelay(2); /* MIPI DC is 2us tRSTON */
-	writel(1 << 17, FPGA_GPIO_BANK_DATA_SET_ADDR(2));
+	writel(1 << 17, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(2));
 	mdelay(1); /* MIPI DC is 1ms tCORERDY */
 
 	ret = uclass_get_device_by_seq(UCLASS_I2C, 0, &bus);
@@ -72,19 +67,30 @@ int ts8551_mipi2dp_present(void)
 		return 0;
 	}
 
-	ret = i2c_get_chip(bus, 0x0f, 2, &chip);
+	ret = i2c_get_chip(bus, 0x0f, 0, &chip);
 	if (ret) {
 		printf("%s: Failed to get i2c chip\n", __FUNCTION__);
 		return 0;
 	}
 
-	ret = dm_i2c_read(chip, 0, &value, sizeof(value));
-	if (!ret){
-		printf("%s: Failed to get read from dp chip\n", __FUNCTION__);
+	i2c_set_chip_offset_len(chip, 2);
+	if (ret) {
+		printf("%s: Failed to get set offset length\n", __FUNCTION__);
 		return 0;
 	}
 
-	return 1;
+	/* I'd expect this to fail if the i2c device does not ack, but currently
+	 * it returns successfully with all 0s. If this is fixed in the future
+	 * we can pass/fail just off i2c responding, otherwise we rely on the
+	 * expected id value from this chip. */
+	ret = dm_i2c_read(chip, 0x500, (uint8_t *)&value, sizeof(value));
+	if (ret){
+		return 0;
+	}
+
+	if (value == 0x6603)
+		return 1;
+	return 0;
 }
 
 /*
