@@ -162,7 +162,8 @@ int board_late_init(void)
 	do_bbdetect();
 
 	/* Drive EN_USB_HOST_5V high */
-	writel(1 << 7, FPGA_GPIO_BANK_DATA_SET_ADDR(1));
+	writel(1 << 5, FPGA_GPIO_BANK_DATA_SET_ADDR(0));
+	writel(1 << 5, FPGA_GPIO_BANK_OE_SET_ADDR(0));
 
 	/* Pulse OFF_BD_RESET# for 1ms */
 	writel(1 << 6, FPGA_GPIO_BANK_DATA_CLEAR_ADDR(0));
