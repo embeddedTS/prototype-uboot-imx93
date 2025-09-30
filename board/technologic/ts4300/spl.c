@@ -72,7 +72,7 @@ void spl_dram_init(void)
 	struct dram_timing_info *ptiming;
 	u16 resistor_straps = read_bom_straps();
 
-	/* On P2, R82 is the only difference between rams.  R81 populated = 1G, depopulated = 2G*/
+	/* On P2, R82 is the only difference between rams.  R82 populated = 1G, depopulated = 2G*/
 	if (resistor_straps & (1 << 1)) {
 		printf("DDR: 1 GB, resistor_straps=%04x\n", resistor_straps);
 		ptiming = &dram_timing_8gb;
